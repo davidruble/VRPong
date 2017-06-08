@@ -59,6 +59,7 @@ public:
 		this->shininess = shininess;
 		// Now that we have all the required data, set the vertex buffers and its attribute pointers.
 		this->setupMesh();
+		cout << "Done setting up Mesh" << endl;
 	}
 
 	// Render the mesh

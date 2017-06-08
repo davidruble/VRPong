@@ -729,7 +729,7 @@ protected:
 		glUniform3fv(glGetUniformLocation(shader->Program, "viewDir"), 1, &viewDir[0]);
 		
 		ball->Draw(*shader);
-		//level->Draw(*shader);
+		level->Draw(*shader);
 		for (int i = 0; i < players.size(); ++i) {
 			players[i].Draw(*shader);
 		}
