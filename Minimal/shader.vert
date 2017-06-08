@@ -7,11 +7,11 @@ uniform int isLaser;
 
 layout(location = 0) in vec4 Position;
 layout(location = 1) in vec3 Normal;
-
+layout (location = 2) in vec2 TexCoords;
 
 out vec3 vertNormal;
 out vec3 Color;
-
+out vec2 Texcoords;
 out vec3 fpos;
 
 
@@ -21,5 +21,6 @@ void main(void) {
    vertNormal =  mat3(transpose(inverse(toWorld))) * Normal;
    gl_Position = ProjectionMatrix * ViewXfm * Position;
    fpos = vec3(toWorld * Position);
+   Texcoords = TexCoords;
   
 }

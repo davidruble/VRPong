@@ -1,11 +1,11 @@
-#pragma once
-
+#ifndef FACTORY_H
+#define FACTORY_H
 #include <vector>
 #include <ctime>
-
+#include "Model.h"
 #include "Molecule.h"
 
-#define FACTORY_PATH "Assets/paddle/paddle.obj"
+#define FACTORY_PATH "Assets/clickclock/untitled.obj"
 #define NUM_MOL_INIT 5
 #define SECS_BTWN_EMIT 1
 #define MAX_MOLS 10
@@ -35,3 +35,4 @@ private:
 
 	clock_t timer;
 };
+#endif

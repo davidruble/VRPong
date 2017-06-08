@@ -1,5 +1,8 @@
-#pragma once
+#ifndef MESH_H
+#define MESH_H
 // Std. Includes
+
+
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -77,9 +80,9 @@ public:
 				ss << specularNr++; // Transfer GLuint to stream
 			number = ss.str();
 			// Now set the sampler to the correct texture unit
-			//glUniform1i(glGetUniformLocation(shader.Program, (name + number).c_str()), i);
+			glUniform1i(glGetUniformLocation(shader.Program, (name + number).c_str()), i);
 			// And finally bind the texture
-			//glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
+			glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
 		}
 
 		// Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
@@ -152,3 +155,4 @@ private:
 		glBindVertexArray(0);
 	}
 };
+#endif

@@ -15,13 +15,17 @@ struct Light {
     vec3 specular;
 };
 
+
 in vec3 vertNormal;
 in vec3 fpos;
 in vec3 viewPos;
 in vec3 viewDir;
+in vec2 Texcoords;
 
 out vec4 fragColor;
 
+
+uniform sampler2D texture_diffuse1;
 uniform Material material;
 uniform Light light;
 
@@ -33,8 +37,14 @@ void main(void) {
     // Diffuse 
    vec3 norm = normalize(vertNormal);
    vec3 lightDir = normalize(light.position - fpos);
-   float diff = max(dot(norm, lightDir), 0.0f);
-   vec3 diffuse = light.diffuse * (diff * material.diffuse);
+   float diff = dot(norm, lightDir);
+   if(diff <= 0.0f)
+		diff = -diff;
+   vec3 diffuse;
+   if(texture(texture_diffuse1, Texcoords).r == 0.0f && texture(texture_diffuse1, Texcoords).g == 0.0f && texture(texture_diffuse1, Texcoords).b == 0.0f)
+		diffuse = light.diffuse * (diff * material.diffuse);
+   else
+		diffuse = light.diffuse * (diff * material.diffuse * texture(texture_diffuse1, Texcoords).rgb);
   
    //Specular
    vec3 viewDir = normalize(viewPos - fpos);

@@ -633,6 +633,7 @@ public:
 #include "Hand.h"
 #include "Laser.h"
 #include "Factory.h"
+#include "Level.h"
 
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
@@ -640,13 +641,14 @@ public:
 #define LVERTEX_SHADER_PATH "laser.vert"
 #define LFRAGMENT_SHADER_PATH "laser.frag"
 
-glm::vec3 lightPos(0.0f, 0.0f, -0.0f);
+glm::vec3 lightPos(0.0f, 0.2f, 0.0f);
 glm::vec3 lightAmbient(0.5f, 0.5f, 0.5f);
-glm::vec3 lightDiffuse(0.9f, 0.9f, 0.9f);
+glm::vec3 lightDiffuse(0.9f, 0.9f, 0.7f);
 glm::vec3 lightSpecular(1.0f, 1.0f, 1.0f);
 
 // An example application that renders a simple cube
 class ExampleApp : public RiftApp {
+	Level * level;
 	Factory * factory;
 	Hand * lefthand;
 	Hand * righthand;
@@ -672,6 +674,7 @@ protected:
 		laserShader = new Shader(LVERTEX_SHADER_PATH, LFRAGMENT_SHADER_PATH);
 		//SETUP INITIAL SCENE HERE
 		factory = new Factory(); //this needs to create 5 molecules
+		level = new Level();
 		lefthand = new Hand(_session, frame, true);
 		righthand = new Hand(_session, frame, false);
 		
@@ -794,9 +797,8 @@ protected:
 		glm::vec3 viewDir = vec3(eyePose.Orientation.x/dehom, eyePose.Orientation.y / dehom, eyePose.Orientation.z / dehom);
 		glUniform3fv(glGetUniformLocation(shader->Program, "viewDir"), 1, &viewDir[0]);
 		
-		//factory->Draw(*shader);
-		
-		lefthand->Draw(*shader);
+		factory->Draw(*shader);
+		//level->Draw(*shader);
 		righthand->Draw(*shader);
 	}
 };
