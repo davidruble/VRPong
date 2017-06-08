@@ -14,7 +14,7 @@ public:
 	glm::mat4 toWorld;
 	glm::vec3 min;
 	glm::vec3 max;
-
+	int playerNum;
 	ovrInputState inputState;
 	ovrPosef HandPose;
 	int handiness;

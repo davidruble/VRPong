@@ -4,12 +4,19 @@
 
 Ball::Ball(): Model (BALL_PATH)
 {
-	velocity = glm::vec3(0.0f, 0.0f, 0.001f);
+	for (GLuint i = 0; i < this->meshes.size(); i++) {
+		meshes[i].toWorld = glm::scale(meshes[i].toWorld, glm::vec3(0.1f, 0.1f, 0.1f));
+	}
+	velocity = glm::vec3(0.0f, 0.0f, 0.01f);
+	released = true;
+	lastPlayer = 0;
 }
 
 void Ball::update() {
-	for (GLuint i = 0; i < this->meshes.size(); i++) {
-		meshes[i].toWorld = glm::translate(meshes[i].toWorld, velocity);
+	if (released) {
+		for (GLuint i = 0; i < this->meshes.size(); i++) {
+			meshes[i].toWorld = glm::translate(meshes[i].toWorld, velocity);
+		}
 	}
 }
 

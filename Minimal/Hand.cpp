@@ -17,6 +17,7 @@ Hand::Hand(ovrSession _session, long long frame, bool isleft) : Model(HAND_PATH)
 	if (HandPose.Position.y > 1.0f) {
 		HandHigh = true;
 	}
+	playerNum = 1;
 }
 
 Hand::~Hand()
@@ -33,8 +34,8 @@ void Hand::calcAABB() {
 			max = glm::max(v, max);
 		}
 	}
-	cout << "min: " << min.x << min.y << min.z << endl;
-	cout << "max: " << max.x << max.y << max.z << endl;
+	//cout << "min: " << min.x << min.y << min.z << endl;
+	//cout << "max: " << max.x << max.y << max.z << endl;
 }
 
 bool Hand::update( ovrSession _session, long long frame, Factory * fac) {

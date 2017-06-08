@@ -770,7 +770,7 @@ protected:
 		vec3 center = ball->calcCenterPoint();
 		vec3 min = righthand->min;
 		vec3 max = righthand->max;
-		cout << "center: " << center.x << center.y << center.z << endl;
+		//cout << "center: " << center.x << center.y << center.z << endl;
 		return (center.x >= min.x && center.x <= max.x) &&
 			(center.y >= min.y && center.y <= max.y) &&
 			(center.z >= min.z && center.z <= max.z);
@@ -785,9 +785,10 @@ protected:
 		//triggerl = lefthand->update(_session, frame, factory);
 		triggerr = righthand->update(_session, frame, factory);
 		ball->update();
-		if (intersect())
+		if (intersect() && ball->lastPlayer != righthand->playerNum)
 		{
 			ball->velocity = -ball->velocity;
+			ball->lastPlayer = righthand->playerNum;
 		}
 		/*if ((frame % 30 == 0) && !(triggerr && triggerl)) {
 			ovr_SetControllerVibration(_session, ovrControllerType_LTouch, 0.0f, 0.0f);

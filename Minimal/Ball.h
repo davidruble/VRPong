@@ -13,5 +13,7 @@ public:
 	~Ball();
 	glm::vec3 velocity;
 	glm::mat4 toWorld;
+	int lastPlayer;
+	bool released;
 };
 
