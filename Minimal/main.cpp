@@ -634,6 +634,7 @@ public:
 #include "Laser.h"
 #include "Factory.h"
 #include "Level.h"
+#include "Ball.h"
 
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
@@ -649,6 +650,7 @@ glm::vec3 lightSpecular(1.0f, 1.0f, 1.0f);
 // An example application that renders a simple cube
 class ExampleApp : public RiftApp {
 	Level * level;
+	Ball * ball;
 	Factory * factory;
 	Hand * lefthand;
 	Hand * righthand;
@@ -675,6 +677,7 @@ protected:
 		//SETUP INITIAL SCENE HERE
 		factory = new Factory(); //this needs to create 5 molecules
 		level = new Level();
+		ball = new Ball();
 		lefthand = new Hand(_session, frame, true);
 		righthand = new Hand(_session, frame, false);
 		
@@ -686,7 +689,7 @@ protected:
 		exit(1);
 	}
 
-
+	/*
 	bool intersect(vector<Molecule*> & mol) 
 	{
 		bool intersect = false;
@@ -762,6 +765,15 @@ protected:
 		}
 
 		return intersect;
+	}*/
+	bool intersect() {
+		vec3 center = ball->calcCenterPoint();
+		vec3 min = righthand->min;
+		vec3 max = righthand->max;
+		cout << "center: " << center.x << center.y << center.z << endl;
+		return (center.x >= min.x && center.x <= max.x) &&
+			(center.y >= min.y && center.y <= max.y) &&
+			(center.z >= min.z && center.z <= max.z);
 	}
 
 	void update() {
@@ -770,14 +782,17 @@ protected:
 		//update hand
 		bool triggerl = false;
 		bool triggerr = false;
-		triggerl = lefthand->update(_session, frame, factory);
+		//triggerl = lefthand->update(_session, frame, factory);
 		triggerr = righthand->update(_session, frame, factory);
-		
-
-		if ((frame % 30 == 0) && !(triggerr && triggerl)) {
+		ball->update();
+		if (intersect())
+		{
+			ball->velocity = -ball->velocity;
+		}
+		/*if ((frame % 30 == 0) && !(triggerr && triggerl)) {
 			ovr_SetControllerVibration(_session, ovrControllerType_LTouch, 0.0f, 0.0f);
 			ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.0f);
-		}
+		}*/
 	}
 
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose, ovrPosef & eyePose) override {
@@ -797,7 +812,8 @@ protected:
 		glm::vec3 viewDir = vec3(eyePose.Orientation.x/dehom, eyePose.Orientation.y / dehom, eyePose.Orientation.z / dehom);
 		glUniform3fv(glGetUniformLocation(shader->Program, "viewDir"), 1, &viewDir[0]);
 		
-		factory->Draw(*shader);
+		//factory->Draw(*shader);
+		ball->Draw(*shader);
 		//level->Draw(*shader);
 		righthand->Draw(*shader);
 	}

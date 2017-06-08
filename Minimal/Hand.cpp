@@ -55,12 +55,11 @@ bool Hand::update( ovrSession _session, long long frame, Factory * fac) {
 	}
 	toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
 	bool HandTriggerPressed = false;
-
+	calcAABB();
 	if (ovr_GetInputState(_session, ovrControllerType_Touch, &inputState) >= 0) {
 
 		if (inputState.HandTrigger[handiness] > 0.5f) {
 			HandTriggerPressed = true;
-			calcAABB();
 			if (handiness == 0) {
 				ovr_SetControllerVibration(_session, ovrControllerType_LTouch, 0.0f, 0.3f);
 			}

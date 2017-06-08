@@ -1,0 +1,17 @@
+#pragma once
+#include "Model.h"
+#include "Shader.h"
+#define BALL_PATH "Assets/dekunut/Deku_Nut.obj"
+
+class Ball : protected Model
+{
+public:
+	Ball();
+	void Draw(Shader shader);
+	void update();
+	glm::vec3 calcCenterPoint();
+	~Ball();
+	glm::vec3 velocity;
+	glm::mat4 toWorld;
+};
+

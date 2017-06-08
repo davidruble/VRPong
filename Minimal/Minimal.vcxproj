@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Hand.cpp" />
     <ClCompile Include="Laser.cpp" />
@@ -154,6 +155,7 @@
     <None Include="shader.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Ball.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Hand.h" />
     <ClInclude Include="Laser.h" />
