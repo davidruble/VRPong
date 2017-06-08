@@ -635,6 +635,7 @@ public:
 #include "Factory.h"
 #include "Level.h"
 #include "Ball.h"
+#include "Player.h"
 
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
@@ -649,15 +650,10 @@ glm::vec3 lightSpecular(1.0f, 1.0f, 1.0f);
 
 // An example application that renders a simple cube
 class ExampleApp : public RiftApp {
+	vector<Player> players;
 	Level * level;
 	Ball * ball;
-	Factory * factory;
-	Hand * lefthand;
-	Hand * righthand;
-	//vector<Laser *> lasers;
-	std::shared_ptr<ColorCubeScene> cubeScene;
 	Shader * shader = NULL;
-	Shader * laserShader = NULL;
 
 	GLint shaderProgram;
 public:
@@ -669,18 +665,14 @@ protected:
 		glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 		ovr_RecenterTrackingOrigin(_session);
-		cubeScene = std::shared_ptr<ColorCubeScene>(new ColorCubeScene());
 		// Load the shader program. Make sure you have the correct filepath up top
 		//shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 		shader = new Shader(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-		laserShader = new Shader(LVERTEX_SHADER_PATH, LFRAGMENT_SHADER_PATH);
 		//SETUP INITIAL SCENE HERE
-		factory = new Factory(); //this needs to create 5 molecules
 		level = new Level();
 		ball = new Ball();
-		lefthand = new Hand(_session, frame, true);
-		righthand = new Hand(_session, frame, false);
-		
+		players.push_back(Player(players.size() + 1, new Hand(_session, frame, false)));
+		players.push_back(Player(players.size() + 1, new Hand(_session, frame, true)));
 
 	}
 
@@ -689,87 +681,10 @@ protected:
 		exit(1);
 	}
 
-	/*
-	bool intersect(vector<Molecule*> & mol) 
-	{
-		bool intersect = false;
-
-		// find if any molecules are intersected
-		for (int i = 0; i < mol.size(); i++) 
-		{
-			// if molecule is already an O2, don't bother checking it
-			if (mol[i]->isO2)
-				continue;
-
-			//solve for t in Originvec + Direction * t
-			float t0, t1;
-			glm::vec3 L;
-			float tca, thc;
-			float d2;
-			float radius2 = 0.01;
-
-			//left hand
-			ovrPosef lhandpose = lefthand->HandPose;
-			glm::vec3 lhandpos = ovr::toGlm(lhandpose.Position);
-			glm::vec3 lhanddir = glm::normalize(ovr::toGlm(lhandpose.Orientation) * glm::vec3(0.0f, 0.0f, -1.0f));
-
-			// determine if left hand ray intersecting with molecule
-			L = mol[i]->calcCenterPoint() - lhandpos;
-			tca = glm::dot(L, lhanddir);
-			if (tca < 0) continue; // no intersect
-			d2 = glm::dot(L, L) - tca * tca;
-			if (d2 > radius2) continue; // no intersect
-			thc = sqrt(radius2 - d2);
-			t0 = tca - thc;
-			t1 = tca + thc;
-
-			// no intersect found, don't bother checking right hand
-			if (t0 > t1) std::swap(t0, t1);
-			if (t0 < 0)
-			{
-				t0 = t1;
-				if (t0 < 0)
-					continue;
-			}
-
-			// right hand
-			ovrPosef rhandpose = righthand->HandPose;
-			glm::vec3 rhandpos = ovr::toGlm(rhandpose.Position);
-			glm::vec3 rhanddir = glm::normalize(ovr::toGlm(rhandpose.Orientation) * glm::vec3(0.0f, 0.0f, -1.0f));
-
-			// determine if left hand ray intersecting with molecule
-			L = mol[i]->calcCenterPoint() - rhandpos;
-			tca = glm::dot(L, rhanddir);
-			if (tca < 0) continue; // no intersect
-			d2 = glm::dot(L, L) - tca * tca;
-			if (d2 > radius2) continue; // no intersect
-			thc = sqrt(radius2 - d2);
-			t0 = tca - thc;
-			t1 = tca + thc;
-
-			// no intersect found
-			if (t0 > t1) std::swap(t0, t1);
-			if (t0 < 0)
-			{
-				t0 = t1;
-				if (t0 < 0)
-					continue;
-			}
-
-			// if we have gotten to this point, then we are intersecting
-			// and we should make dat O2
-			intersect = true;
-			mol[i]->makeO2();
-			--factory->getNumCO2Molecules();
-			break;
-		}
-
-		return intersect;
-	}*/
-	bool intersect() {
+	bool intersect(int playernum) {
 		vec3 center = ball->calcCenterPoint();
-		vec3 min = righthand->min;
-		vec3 max = righthand->max;
+		vec3 min = players[playernum].hand->min;
+		vec3 max = players[playernum].hand->max;
 		//cout << "center: " << center.x << center.y << center.z << endl;
 		return (center.x >= min.x && center.x <= max.x) &&
 			(center.y >= min.y && center.y <= max.y) &&
@@ -778,22 +693,22 @@ protected:
 
 	void update() {
 
-		//update factory
 		//update hand
-		bool triggerl = false;
 		bool triggerr = false;
-		//triggerl = lefthand->update(_session, frame, factory);
-		triggerr = righthand->update(_session, frame, factory);
+	
 		ball->update();
-		if (intersect() && ball->lastPlayer != righthand->playerNum)
-		{
-			ball->velocity = -ball->velocity;
-			ball->lastPlayer = righthand->playerNum;
+		for (int i = 0; i < players.size(); ++i) {
+			triggerr = players[i].hand->update(_session, frame);
+			if (intersect(i) && ball->lastPlayer != players[i].playerNum)
+			{
+				ball->velocity = -ball->velocity;
+				ball->lastPlayer = players[i].playerNum;
+			}
 		}
-		/*if ((frame % 30 == 0) && !(triggerr && triggerl)) {
+		if ((frame % 30 == 0) && !(triggerr)) {
 			ovr_SetControllerVibration(_session, ovrControllerType_LTouch, 0.0f, 0.0f);
 			ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.0f);
-		}*/
+		}
 	}
 
 	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose, ovrPosef & eyePose) override {
@@ -813,10 +728,11 @@ protected:
 		glm::vec3 viewDir = vec3(eyePose.Orientation.x/dehom, eyePose.Orientation.y / dehom, eyePose.Orientation.z / dehom);
 		glUniform3fv(glGetUniformLocation(shader->Program, "viewDir"), 1, &viewDir[0]);
 		
-		//factory->Draw(*shader);
 		ball->Draw(*shader);
 		//level->Draw(*shader);
-		righthand->Draw(*shader);
+		for (int i = 0; i < players.size(); ++i) {
+			players[i].Draw(*shader);
+		}
 	}
 };
 

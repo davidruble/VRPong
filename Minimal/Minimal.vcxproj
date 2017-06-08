@@ -140,6 +140,7 @@
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Factory.cpp" />
     <ClCompile Include="Hand.cpp" />
+    <ClCompile Include="Head.cpp" />
     <ClCompile Include="Laser.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Model.h" />
     <ClCompile Include="Molecule.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
@@ -158,10 +160,12 @@
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Hand.h" />
+    <ClInclude Include="Head.h" />
     <ClInclude Include="Laser.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="Molecule.h" />
     <ClInclude Include="OVRUTIL.h" />
+    <ClInclude Include="Player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

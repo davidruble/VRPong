@@ -17,7 +17,6 @@ Hand::Hand(ovrSession _session, long long frame, bool isleft) : Model(HAND_PATH)
 	if (HandPose.Position.y > 1.0f) {
 		HandHigh = true;
 	}
-	playerNum = 1;
 }
 
 Hand::~Hand()
@@ -38,7 +37,7 @@ void Hand::calcAABB() {
 	//cout << "max: " << max.x << max.y << max.z << endl;
 }
 
-bool Hand::update( ovrSession _session, long long frame, Factory * fac) {
+bool Hand::update( ovrSession _session, long long frame) {
 	//transform hands
 	displayMidpointSeconds = ovr_GetPredictedDisplayTime(_session, frame);
 	trackState = ovr_GetTrackingState(_session, displayMidpointSeconds, ovrTrue);

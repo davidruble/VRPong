@@ -14,13 +14,12 @@ public:
 	glm::mat4 toWorld;
 	glm::vec3 min;
 	glm::vec3 max;
-	int playerNum;
 	ovrInputState inputState;
 	ovrPosef HandPose;
 	int handiness;
 	Hand(ovrSession, long long, bool left);
 	~Hand();
-	bool update(ovrSession, long long, Factory *);
+	bool update(ovrSession, long long);
 	void calcAABB();
 	void Draw(Shader shader);
 private:

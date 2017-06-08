@@ -98,6 +98,7 @@ public:
 		glUniform3fv(matDiffuseLoc, 1, &diffuse[0]);
 		glUniform3fv(matSpecularLoc, 1, &specular[0]);
 		glUniform1f(matShineLoc, shininess);
+
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "toWorld"), 1, GL_FALSE, &(toWorld)[0][0]);
 		// Draw mesh
 		glBindVertexArray(this->VAO);
