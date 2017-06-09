@@ -107,18 +107,27 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\nganjehl\Desktop\GitHub\VRPong\leapmotionclient\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>SOIL.lib;glfw3.lib;LibOVR.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SOIL.lib;glfw3.lib;LibOVR.lib;opengl32.lib;Leap.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\nganjehl\Desktop\GitHub\VRPong\leapmotionclient\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>xcopy /yr "C:\Users\nganjehl\Desktop\GitHub\VRPong\leapmotionclient\lib\Leap.dll" "$(TargetDir)"</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy /yr "C:\Users\nganjehl\Desktop\GitHub\VRPong\leapmotionclient\lib\Leap.dll" "$(TargetDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Hand.cpp" />
     <ClCompile Include="Head.cpp" />
+    <ClCompile Include="LeapListener.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -134,6 +143,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Hand.h" />
     <ClInclude Include="Head.h" />
+    <ClInclude Include="LeapListener.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />

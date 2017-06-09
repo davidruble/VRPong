@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
+#include "Leap/Leap.h"
 #include "Camera.h"
-
+#include "LeapListener.h"
 #include <iostream>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -14,6 +14,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 void initGame();
+void update();
 // settings
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
@@ -24,6 +25,8 @@ Camera camera2(glm::vec3(0.015f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+LeapListener listener;
+Leap::Controller controller;
 
 // timing
 float deltaTime = 0.0f;
@@ -115,6 +118,27 @@ int main()
 
         // input
         // -----
+		if (controller.frame(0).hands().count() > 0) {
+			if (controller.frame(0).isValid()) {
+				Leap::HandList hands = controller.frame(0).hands();
+				int i = 0;
+				auto hl = hands.begin();
+					if ((*hl).isValid()) {
+						cout << (*hl).palmPosition().toString() << endl;
+						cout << i << endl;
+						Leap::Vector pos = (*hl).palmPosition();
+						players[0].hand->HandPose.Position.x = pos.x/100.0f;
+						players[0].hand->HandPose.Position.y = pos.y/100.0f;
+						players[0].hand->HandPose.Position.z = pos.z/100.0f;
+
+						players[0].hand->HandPose.Orientation.x = (*hl).palmNormal().x;
+						players[0].hand->HandPose.Orientation.y = (*hl).palmNormal().y;
+						players[0].hand->HandPose.Orientation.z = (*hl).palmNormal().z;
+						players[0].hand->HandPose.Orientation.w = 0;
+					}
+			}
+		}
+		update();
         processInput(window);
 
         // render
@@ -178,7 +202,7 @@ int main()
 		}
 
 		glColorMask(true, true, true, true);
-
+		cout << "bro" << endl;
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -192,14 +216,45 @@ int main()
     return 0;
 }
 
+bool intersect(int playernum) {
+	glm::vec3 center = ball->calcCenterPoint();
+	glm::vec3 min = players[playernum].hand->min;
+	glm::vec3 max = players[playernum].hand->max;
+	//cout << "center: " << center.x << center.y << center.z << endl;
+	return (center.x >= min.x && center.x <= max.x) &&
+		(center.y >= min.y && center.y <= max.y) &&
+		(center.z >= min.z && center.z <= max.z);
+}
+
+void update() {
+	bool triggerr = false;
+
+	ball->update();
+	for (int i = 0; i < players.size(); ++i) {
+		if (players[i].hand->isLeap) {
+			cout << "leap" << endl;
+			triggerr = players[i].hand->update();
+		}else {
+			cout << "not leap" << endl;
+			triggerr = players[i].hand->update();
+		}
+		if (intersect(i) && ball->lastPlayer != players[i].playerNum)
+		{
+			ball->velocity = -ball->velocity;
+			ball->lastPlayer = players[i].playerNum;
+		}
+	}
+}
+
 void initGame() {
 	shader = new Shader(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	//SETUP INITIAL SCENE HERE
 	level = new Level();
 	ball = new Ball();
-	//players.push_back(Player(players.size() + 1, new Hand(_session, frame, false)));
-	//players.push_back(Player(players.size() + 1, new Hand(_session, frame, true)));
-
+	players.push_back(Player(players.size() + 1, new Hand(true)));
+	//players.push_back(Player(players.size() + 1, new Hand(NULL, 0, true)));
+	//controller.addListener(listener);
+	//controller.setPolicy(Leap::Controller::POLICY_ALLOW_PAUSE_RESUME);
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly

@@ -21,6 +21,7 @@ Hand::Hand(ovrSession _session, long long frame, bool isleft) : Model(HAND_PATH)
 
 Hand::Hand(bool isleap) : Model(HAND_PATH)
 {
+	isLeap = isleap;
 	//Controller and frame setup
 }
 
@@ -43,6 +44,7 @@ void Hand::calcAABB() {
 }
 
 bool Hand::update(ovrSession _session, long long frame) {
+	cout << "starting update" << endl;
 	//transform hands
 	if (!isLeap){
 		displayMidpointSeconds = ovr_GetPredictedDisplayTime(_session, frame);
@@ -76,9 +78,13 @@ bool Hand::update(ovrSession _session, long long frame) {
 			}
 		}
 		return HandTriggerPressed;
-	}
-	else {
-
+	}else {
+		cout << "update" << endl;
+		for (GLuint i = 0; i < this->meshes.size(); i++) {
+			meshes[i].toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
+		}
+		toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
+		calcAABB();
 		return false;
 	}
 }

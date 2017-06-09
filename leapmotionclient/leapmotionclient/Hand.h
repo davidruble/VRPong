@@ -15,15 +15,15 @@ public:
 	glm::vec3 max;
 	ovrInputState inputState;
 	ovrPosef HandPose;
+	bool isLeap = false;
 	int handiness = 0;
 	Hand(ovrSession = NULL, long long = 0, bool left = false);
 	Hand(bool isleap = false);
 	~Hand();
-	bool update(ovrSession, long long);
+	bool update(ovrSession = NULL, long long = 0);
 	void calcAABB();
 	void Draw(Shader shader);
 private:
-	bool isLeap = false;
 	double displayMidpointSeconds;
 	ovrTrackingState trackState;
 	
