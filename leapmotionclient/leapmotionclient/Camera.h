@@ -137,9 +137,9 @@ public:
 		Projection[2][3] = -1;
 		Projection[3][2] = -2 * f*n / (f - n);
 		if(!left)
-			glm::translate(Projection, glm::vec3(0.6f, 0.0f, 0.0f));
+			glm::translate(Projection, glm::vec3(0.3f, 0.0f, 0.0f));
 		else
-			glm::translate(Projection, glm::vec3(-0.6f, 0.0f, 0.0f));
+			glm::translate(Projection, glm::vec3(-0.3f, 0.0f, 0.0f));
 
 		return Projection;
 	}
