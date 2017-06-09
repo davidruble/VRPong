@@ -15,11 +15,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 void initGame();
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera1(glm::vec3(-0.015f, 0.0f, 3.0f));
+Camera camera2(glm::vec3(0.015f, 0.0f, 3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -119,9 +120,12 @@ int main()
         // render
         // ------
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // don't forget to enable shader before setting uniforms
+		
+		//pass 1
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glColorMask(true, false, false, false);
 
 		shader->Use();
 
@@ -130,20 +134,49 @@ int main()
 		glUniform3fv(glGetUniformLocation(shader->Program, "light.diffuse"), 1, &lightDiffuse[0]);
 		glUniform3fv(glGetUniformLocation(shader->Program, "light.specular"), 1, &lightSpecular[0]);
         // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 projection = glm::perspective(glm::radians(camera1.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera1.GetViewMatrix();
 		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "CameraMatrix"), 1, GL_FALSE, &(view)[0][0]);
 		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "ProjectionMatrix"), 1, GL_FALSE, &projection[0][0]);
 
         // render the loaded model
-		glUniform3fv(glGetUniformLocation(shader->Program, "viewPos"), 1, &(camera.Position)[0]);
-		glUniform3fv(glGetUniformLocation(shader->Program, "viewDir"), 1, &(camera.Front)[0]);
+		glUniform3fv(glGetUniformLocation(shader->Program, "viewPos"), 1, &(camera1.Position)[0]);
+		glUniform3fv(glGetUniformLocation(shader->Program, "viewDir"), 1, &(camera1.Front)[0]);
 
 		ball->Draw(*shader);
 		level->Draw(*shader);
 		for (int i = 0; i < players.size(); ++i) {
 			players[i].Draw(*shader);
 		}
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glColorMask(false, true, true, false);
+
+
+		shader->Use();
+
+		glUniform3fv(glGetUniformLocation(shader->Program, "light.position"), 1, &lightPos[0]);
+		glUniform3fv(glGetUniformLocation(shader->Program, "light.ambient"), 1, &lightAmbient[0]);
+		glUniform3fv(glGetUniformLocation(shader->Program, "light.diffuse"), 1, &lightDiffuse[0]);
+		glUniform3fv(glGetUniformLocation(shader->Program, "light.specular"), 1, &lightSpecular[0]);
+		// view/projection transformations
+		projection = glm::perspective(glm::radians(camera2.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		view = camera2.GetViewMatrix();
+		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "CameraMatrix"), 1, GL_FALSE, &(view)[0][0]);
+		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "ProjectionMatrix"), 1, GL_FALSE, &projection[0][0]);
+
+		// render the loaded model
+		glUniform3fv(glGetUniformLocation(shader->Program, "viewPos"), 1, &(camera2.Position)[0]);
+		glUniform3fv(glGetUniformLocation(shader->Program, "viewDir"), 1, &(camera2.Front)[0]);
+
+		ball->Draw(*shader);
+		level->Draw(*shader);
+		for (int i = 0; i < players.size(); ++i) {
+			players[i].Draw(*shader);
+		}
+
+		glColorMask(true, true, true, true);
+
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -174,14 +207,22 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		camera1.ProcessKeyboard(FORWARD, deltaTime);
+		camera2.ProcessKeyboard(FORWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		camera1.ProcessKeyboard(BACKWARD, deltaTime);
+		camera2.ProcessKeyboard(BACKWARD, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		camera1.ProcessKeyboard(LEFT, deltaTime);
+		camera2.ProcessKeyboard(LEFT, deltaTime);
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		camera1.ProcessKeyboard(RIGHT, deltaTime);
+		camera2.ProcessKeyboard(RIGHT, deltaTime);
+	}
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -210,12 +251,14 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    camera1.ProcessMouseMovement(xoffset, yoffset);
+	camera2.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera.ProcessMouseScroll(yoffset);
+    camera1.ProcessMouseScroll(yoffset);
+	camera2.ProcessMouseScroll(yoffset);
 }

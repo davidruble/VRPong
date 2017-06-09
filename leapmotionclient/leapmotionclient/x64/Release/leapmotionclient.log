@@ -1,30 +1,19 @@
-﻿  Ball.cpp
+﻿  main.cpp
 \\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\visual studio 2015\projects\leapmotionclient\leapmotionclient\Mesh.h(107): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  Hand.cpp
-\\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\visual studio 2015\projects\leapmotionclient\leapmotionclient\Mesh.h(107): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  Head.cpp
-\\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\visual studio 2015\projects\leapmotionclient\leapmotionclient\Mesh.h(107): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  Level.cpp
-\\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\visual studio 2015\projects\leapmotionclient\leapmotionclient\Mesh.h(107): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  Model.cpp
-\\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\visual studio 2015\projects\leapmotionclient\leapmotionclient\Mesh.h(107): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  Player.cpp
-\\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\visual studio 2015\projects\leapmotionclient\leapmotionclient\Mesh.h(107): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  main.cpp
-\\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\visual studio 2015\projects\leapmotionclient\leapmotionclient\Mesh.h(107): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-main.cpp(111): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-main.cpp(202): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-main.cpp(203): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-main.cpp(207): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-main.cpp(208): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-main.cpp(210): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-main.cpp(211): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-main.cpp(220): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+main.cpp(112): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+main.cpp(243): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+main.cpp(244): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+main.cpp(248): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+main.cpp(249): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+main.cpp(251): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+main.cpp(252): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+main.cpp(262): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+main.cpp(263): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  10 of 931 functions ( 1.1%) were compiled, the rest were copied from previous compilation.
+  11 of 932 functions ( 1.2%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    36 functions had inline decision re-evaluated but remain unchanged
+    3 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   leapmotionclient.vcxproj -> \\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\visual studio 2015\Projects\leapmotionclient\x64\Release\leapmotionclient.exe
   leapmotionclient.vcxproj -> \\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\visual studio 2015\Projects\leapmotionclient\x64\Release\leapmotionclient.pdb (Full PDB)
