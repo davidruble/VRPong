@@ -1,5 +1,4 @@
 #include "Hand.h"
-#include "OVRUTIL.h"
 Hand::Hand(ovrSession _session, long long frame, bool isleft) : Model(HAND_PATH)
 {
 	if (isleft) {
@@ -46,43 +45,46 @@ void Hand::calcAABB() {
 	//cout << "min: " << min.x << min.y << min.z << endl;
 	//cout << "max: " << max.x << max.y << max.z << endl;
 }
+void Hand::pollOculusInput(ovrSession _session, long long frame) {
+	displayMidpointSeconds = ovr_GetPredictedDisplayTime(_session, frame);
+	trackState = ovr_GetTrackingState(_session, displayMidpointSeconds, ovrTrue);
+	HandPose = trackState.HandPoses[handiness].ThePose;
+}
 
-bool Hand::update(ovrSession _session, long long frame) {
+void Hand::pollLeapInput(Leap::Controller & controller, Player & player) {
+	if (controller.frame(0).hands().count() > 0) {
+		if (controller.frame(0).isValid()) {
+			Leap::HandList hands = controller.frame(0).hands();
+			int i = 0;
+			auto hl = hands.begin();
+			if ((*hl).isValid()) {
+				cout << (*hl).palmPosition().toString() << endl;
+				cout << i << endl;
+				Leap::Vector pos = (*hl).palmPosition();
+				player.hand->HandPose.Position.x = -pos.x / 100.0f;
+				player.hand->HandPose.Position.y = pos.y / 100.0f - 1.0f;
+				player.hand->HandPose.Position.z = -pos.z / 100.0f - 2.3f;
+
+				player.hand->HandPose.Orientation.x = (*hl).palmNormal().x;
+				player.hand->HandPose.Orientation.y = -(*hl).palmNormal().y;
+				player.hand->HandPose.Orientation.z = (*hl).palmNormal().z;
+				player.hand->HandPose.Orientation.w = 0;
+			}
+		}
+	}
+}
+bool Hand::update() {
 	cout << "starting update" << endl;
 	//transform hands
 	if (!isLeap){
 		cout << "deg" << endl;
-		displayMidpointSeconds = ovr_GetPredictedDisplayTime(_session, frame);
-		trackState = ovr_GetTrackingState(_session, displayMidpointSeconds, ovrTrue);
 
-
-		HandPose = trackState.HandPoses[handiness].ThePose;
-
-		color = glm::vec3(0.0f, 0.9f, 0.5f);
-		bool HandHigh = false;
-		if (HandPose.Position.y > 1.0f) {
-			HandHigh = true;
-		}
 		for (GLuint i = 0; i < this->meshes.size(); i++) {
-		//	meshes[i].toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
+			meshes[i].toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
 		}
-		//toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
-		bool HandTriggerPressed = false;
+		toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
 		calcAABB();
-		if (ovr_GetInputState(_session, ovrControllerType_Touch, &inputState) >= 0) {
-
-			if (inputState.HandTrigger[handiness] > 0.5f) {
-				HandTriggerPressed = true;
-				if (handiness == 0) {
-					ovr_SetControllerVibration(_session, ovrControllerType_LTouch, 0.0f, 0.3f);
-				}
-				else {
-					ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.3f);
-				}
-
-			}
-		}
-		return HandTriggerPressed;
+		return false;
 	}else {
 		cout << "update" << endl;
 		for (GLuint i = 0; i < this->meshes.size(); i++) {

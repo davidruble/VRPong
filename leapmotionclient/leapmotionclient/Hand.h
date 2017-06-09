@@ -1,9 +1,15 @@
-#pragma once
+#ifndef HAND_H
+#define HAND_H
 #include "Model.h"
 #include "Shader.h"
+#include "Player.h"
+#include "Leap\Leap.h"
+#include "OVRUTIL.h"
 #include "LibOVR/OVR_CAPI.h"
 #include "LibOVR/OVR_CAPI_GL.h"
 #define HAND_PATH "Assets/paddle/paddle.obj"
+
+class Player;
 class Hand : protected Model
 {
 public:
@@ -20,7 +26,9 @@ public:
 	Hand(ovrSession = NULL, long long = 0, bool left = false);
 	Hand(bool isleap = false);
 	~Hand();
-	bool update(ovrSession = NULL, long long = 0);
+	bool update();
+	void pollOculusInput(ovrSession _session, long long frame);
+	void pollLeapInput(Leap::Controller & controller, Player & player);
 	void calcAABB();
 	void Draw(Shader shader);
 private:
@@ -28,3 +36,4 @@ private:
 	ovrTrackingState trackState;
 	
 };
+#endif

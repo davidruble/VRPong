@@ -1,7 +1,5 @@
 #include "Player.h"
 
-
-
 Player::Player(int playernum, Hand * phand)
 {
 	playerNum = playernum;
@@ -17,11 +15,12 @@ void Player::Draw(Shader shader) {
 }
 
 void Player::update(ovrSession _session, long long frame) {
-	hand->update(_session, frame);
+	hand->update();
 	if (hand->isLeap) {
-		head->update(hand->HandPose, hand->isLeap);
+		head->HeadPose = hand->HandPose;
+		head->update(hand->isLeap);
 	}else {
-		head->update(hand->HandPose, false);
+		head->update(false);
 	}
 }
 Player::~Player()

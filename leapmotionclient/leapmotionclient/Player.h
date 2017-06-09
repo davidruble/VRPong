@@ -1,9 +1,13 @@
-#pragma once
+#ifndef PLAYER_H
+#define PLAYER_H
+
 #include "Head.h"
 #include "Hand.h"
+class Hand;
 class Player
 {
 public:
+	Player();
 	Player(int playernum, Hand * phand);
 	void Draw(Shader shader);
 	void update(ovrSession, long long);
@@ -12,4 +16,5 @@ public:
 	Head * head;
 	Hand * hand;
 };
+#endif
 

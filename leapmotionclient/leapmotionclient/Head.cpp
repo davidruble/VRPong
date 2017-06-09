@@ -7,7 +7,7 @@ Head::Head() : Model(HEAD_PATH)
 }
 
 
-bool Head::update(ovrPosef HeadPose, bool isLeap) {
+bool Head::update(bool isLeap) {
 	cout << "starting update" << endl;
 	//transform hands
 	if (!isLeap) {

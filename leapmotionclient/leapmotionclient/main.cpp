@@ -118,26 +118,6 @@ int main()
 
         // input
         // -----
-		if (controller.frame(0).hands().count() > 0) {
-			if (controller.frame(0).isValid()) {
-				Leap::HandList hands = controller.frame(0).hands();
-				int i = 0;
-				auto hl = hands.begin();
-					if ((*hl).isValid()) {
-						cout << (*hl).palmPosition().toString() << endl;
-						cout << i << endl;
-						Leap::Vector pos = (*hl).palmPosition();
-						players[1].hand->HandPose.Position.x = -pos.x/100.0f;
-						players[1].hand->HandPose.Position.y = pos.y/100.0f - 1.0f;
-						players[1].hand->HandPose.Position.z = -pos.z/100.0f - 2.3f;
-
-						players[1].hand->HandPose.Orientation.x = (*hl).palmNormal().x;
-						players[1].hand->HandPose.Orientation.y = -(*hl).palmNormal().y;
-						players[1].hand->HandPose.Orientation.z = (*hl).palmNormal().z;
-						players[1].hand->HandPose.Orientation.w = 0;
-					}
-			}
-		}
 		update();
         processInput(window);
 
@@ -233,9 +213,13 @@ void update() {
 	for (int i = 0; i < players.size(); ++i) {
 		if (players[i].hand->isLeap) {
 			cout << "leap" << endl;
+			players[i].hand->pollLeapInput(controller, players[i]);
 			players[i].update(NULL, NULL);
 		}else {
 			cout << "not leap" << endl;
+			//set hand and head pose here fromw/e we got from network
+			//players[i].head->HeadPose = shit;
+			//players[i].hand->HandPose = shit;
 			players[i].update(NULL, NULL);
 		}
 		if (intersect(i) && ball->lastPlayer != players[i].playerNum)

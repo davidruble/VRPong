@@ -8,9 +8,10 @@ class Head : protected Model
 {
 public:
 	Head();
-	bool update(ovrPosef, bool isleap );
+	bool update(bool isleap );
 	void Draw(Shader shader);
 	~Head();
+	ovrPosef HeadPose;
 	glm::mat4 toWorld;
 };
 
