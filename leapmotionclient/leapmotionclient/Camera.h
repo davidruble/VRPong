@@ -113,6 +113,103 @@ public:
 			Zoom = 45.0f;
 	}
 
+	glm::mat4 stereoProject(int SCR_WIDTH, int SCR_HEIGHT, bool left) {
+		float top, bottom, l, r;
+		float f = 20000.0f;
+		float n = 0.01f;
+		glm::mat4 Projection = glm::mat4(0.0f);
+		top = n * tan(glm::radians(Zoom) / 2);
+		bottom = -top;
+
+		float a = (float)SCR_WIDTH / (float)SCR_HEIGHT * tan(glm::radians(Zoom) / 2) *  2000.0f;
+
+		float b = a - 35.0f / 2;
+		float c = a + 35.0f / 2;
+
+		l = -b * n / 2000.0f;
+		r = c * n / 2000.0f;
+
+		Projection[0][0] = 2 * n / (r - l);
+		Projection[1][1] = 2 * n / (top - bottom);
+		Projection[2][0] = (r + l) / (r - l);
+		Projection[2][1] = (top + bottom) / (top - bottom);
+		Projection[2][2] = -(f + n) / (f - n);
+		Projection[2][3] = -1;
+		Projection[3][2] = -2 * f*n / (f - n);
+		if(!left)
+			glm::translate(Projection, glm::vec3(0.2f, 0.0f, 0.0f));
+		else
+			glm::translate(Projection, glm::vec3(-0.2f, 0.0f, 0.0f));
+
+		return Projection;
+	}
+
+	glm::mat4 projection(
+		const glm::vec3 pa,
+		const glm::vec3 pb,
+		const glm::vec3 pc,
+		const glm::vec3 pe, float n, float f)
+	{
+		glm::vec3 va, vb, vc;
+		glm::vec3 vr, vu, vn;
+
+		float l, r, b, t, d;
+
+		glm::mat4 M = glm::mat4(0.0f);
+		glm::mat4 Projection = glm::mat4(0.0f);
+		// Compute an orthonormal basis for the screen.
+
+		vr = pb - pa;
+		vu = pc - pa;
+
+		normalize(vr);
+		normalize(vu);
+		vn = cross(vr, vu);
+		normalize(vn);
+
+		// Compute the screen corner vectors.
+
+		va = pa - pe;
+		vb = pb - pe;
+		vc = pc - pe;
+
+		// Find the distance from the eye to screen plane.
+
+		d = -dot(va, vn);
+
+		// Find the extent of the perpendicular projection.
+
+		l = dot(vr, va) * n / d;
+		r = dot(vr, vb) * n / d;
+		b = dot(vu, va) * n / d;
+		t = dot(vu, vc) * n / d;
+
+		// Load the perpendicular projection.
+
+		//glFrustum(l, r, b, t, n, f);
+		Projection[0][0] = 2 * n / (r - l);
+		Projection[1][1] = 2 * n / (t - b);
+		Projection[2][0] = (r + l) / (r - l);
+		Projection[2][1] = (t + b) / (t - b);
+		Projection[2][2] = -(f + n) / (f - n);
+		Projection[2][3] = -1;
+		Projection[3][2] = -2 * f*n / (f - n);
+
+		// Rotate the projection to be non-perpendicular.
+
+		M[0] = glm::vec4(vr, 0.0f);
+		M[1] = glm::vec4(vu, 0.0f);
+		M[2] = glm::vec4(vn, 0.0f);
+		M[3] = glm::vec4(glm::vec3(0.0f), 1.0f);
+
+		M = transpose(M);
+		// Move the apex of the frustum to the origin.
+
+		glm::mat4 tempM = glm::translate(M, pe*-1.0f);
+
+		return Projection*tempM;
+	}
+
 private:
 	// Calculates the front vector from the Camera's (updated) Eular Angles
 	void updateCameraVectors()
