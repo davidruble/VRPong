@@ -17,6 +17,10 @@ Hand::Hand(ovrSession _session, long long frame, bool isleft) : Model(HAND_PATH)
 	if (HandPose.Position.y > 1.0f) {
 		HandHigh = true;
 	}
+	for (GLuint i = 0; i < this->meshes.size(); i++) {
+		meshes[i].toWorld = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.05f, 0.05f, 0.05f)), glm::vec3(0.0f, -1.0f, 30.0f));
+	}
+	toWorld = glm::translate(glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f)), glm::vec3(0.0f, -1.0f, 30.0f));
 }
 
 Hand::Hand(bool isleap) : Model(HAND_PATH)
@@ -47,6 +51,7 @@ bool Hand::update(ovrSession _session, long long frame) {
 	cout << "starting update" << endl;
 	//transform hands
 	if (!isLeap){
+		cout << "deg" << endl;
 		displayMidpointSeconds = ovr_GetPredictedDisplayTime(_session, frame);
 		trackState = ovr_GetTrackingState(_session, displayMidpointSeconds, ovrTrue);
 
@@ -59,9 +64,9 @@ bool Hand::update(ovrSession _session, long long frame) {
 			HandHigh = true;
 		}
 		for (GLuint i = 0; i < this->meshes.size(); i++) {
-			meshes[i].toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
+		//	meshes[i].toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
 		}
-		toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
+		//toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
 		bool HandTriggerPressed = false;
 		calcAABB();
 		if (ovr_GetInputState(_session, ovrControllerType_Touch, &inputState) >= 0) {
@@ -81,9 +86,9 @@ bool Hand::update(ovrSession _session, long long frame) {
 	}else {
 		cout << "update" << endl;
 		for (GLuint i = 0; i < this->meshes.size(); i++) {
-			meshes[i].toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
+			meshes[i].toWorld = glm::translate(glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f)), glm::vec3(0.0f, -1.0f, -3.0f));
 		}
-		toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
+		toWorld = glm::translate(glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f)), glm::vec3(0.0f, -1.0f, -3.0f));
 		calcAABB();
 		return false;
 	}

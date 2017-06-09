@@ -20,14 +20,14 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera1(glm::vec3(-0.015f, 0.0f, 3.0f));
-Camera camera2(glm::vec3(0.015f, 0.0f, 3.0f));
+Camera camera1(glm::vec3(-0.015f, 0.1f, -3.0f));
+Camera camera2(glm::vec3(0.015f, 0.1f, -3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 LeapListener listener;
 Leap::Controller controller;
-
+const int playerid = 2;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -127,14 +127,14 @@ int main()
 						cout << (*hl).palmPosition().toString() << endl;
 						cout << i << endl;
 						Leap::Vector pos = (*hl).palmPosition();
-						players[0].hand->HandPose.Position.x = pos.x/100.0f;
-						players[0].hand->HandPose.Position.y = pos.y/100.0f;
-						players[0].hand->HandPose.Position.z = pos.z/100.0f;
+						players[1].hand->HandPose.Position.x = -pos.x/100.0f;
+						players[1].hand->HandPose.Position.y = pos.y/100.0f - 1.0f;
+						players[1].hand->HandPose.Position.z = -pos.z/100.0f - 2.3f;
 
-						players[0].hand->HandPose.Orientation.x = (*hl).palmNormal().x;
-						players[0].hand->HandPose.Orientation.y = (*hl).palmNormal().y;
-						players[0].hand->HandPose.Orientation.z = (*hl).palmNormal().z;
-						players[0].hand->HandPose.Orientation.w = 0;
+						players[1].hand->HandPose.Orientation.x = (*hl).palmNormal().x;
+						players[1].hand->HandPose.Orientation.y = -(*hl).palmNormal().y;
+						players[1].hand->HandPose.Orientation.z = (*hl).palmNormal().z;
+						players[1].hand->HandPose.Orientation.w = 0;
 					}
 			}
 		}
@@ -233,10 +233,10 @@ void update() {
 	for (int i = 0; i < players.size(); ++i) {
 		if (players[i].hand->isLeap) {
 			cout << "leap" << endl;
-			triggerr = players[i].hand->update();
+			players[i].update(NULL, NULL);
 		}else {
 			cout << "not leap" << endl;
-			triggerr = players[i].hand->update();
+			players[i].update(NULL, NULL);
 		}
 		if (intersect(i) && ball->lastPlayer != players[i].playerNum)
 		{
@@ -251,8 +251,8 @@ void initGame() {
 	//SETUP INITIAL SCENE HERE
 	level = new Level();
 	ball = new Ball();
+	players.push_back(Player(players.size() + 1, new Hand(NULL, 0, true)));
 	players.push_back(Player(players.size() + 1, new Hand(true)));
-	//players.push_back(Player(players.size() + 1, new Hand(NULL, 0, true)));
 	//controller.addListener(listener);
 	//controller.setPolicy(Leap::Controller::POLICY_ALLOW_PAUSE_RESUME);
 }
