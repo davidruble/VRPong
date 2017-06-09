@@ -443,6 +443,7 @@ protected:
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, curTexId, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		ovr::for_each_eye([&](ovrEyeType eye) {
+			eyePoses[eye].Position.z += 2.5f;
 			const auto& vp = _sceneLayer.Viewport[eye];
 			glViewport(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
 			_sceneLayer.RenderPose[eye] = eyePoses[eye];
@@ -672,7 +673,7 @@ protected:
 		level = new Level();
 		ball = new Ball();
 		players.push_back(Player(players.size() + 1, new Hand(_session, frame, false)));
-		players.push_back(Player(players.size() + 1, new Hand(_session, frame, true)));
+		players.push_back(Player(players.size() + 1, new Hand(true)));
 
 	}
 
@@ -692,22 +693,29 @@ protected:
 	}
 
 	void update() {
-
-		//update hand
 		bool triggerr = false;
-	
+
 		ball->update();
 		for (int i = 0; i < players.size(); ++i) {
-			triggerr = players[i].hand->update(_session, frame);
+			if (players[i].hand->isLeap) {
+				cout << "leap" << endl;
+				////set hand and head pose here fromw/e we got from network
+				//players[i].head->HeadPose = shit;
+				//players[i].hand->HandPose = shit;
+				players[i].update(NULL, NULL);
+			}
+			else {
+				cout << "not leap" << endl;
+				players[i].hand->pollOculusInput(_session, frame);
+				players[i].hand->HandPose.Position.z += 2.5f;
+				players[i].update(NULL, NULL);
+			}
+
 			if (intersect(i) && ball->lastPlayer != players[i].playerNum)
 			{
 				ball->velocity = -ball->velocity;
 				ball->lastPlayer = players[i].playerNum;
 			}
-		}
-		if ((frame % 30 == 0) && !(triggerr)) {
-			ovr_SetControllerVibration(_session, ovrControllerType_LTouch, 0.0f, 0.0f);
-			ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.0f);
 		}
 	}
 
