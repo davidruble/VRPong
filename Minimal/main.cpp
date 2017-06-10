@@ -637,16 +637,19 @@ public:
 #include "Level.h"
 #include "Ball.h"
 #include "Player.h"
+#include <irrKlang\irrKlang.h>
+#include <stdio.h>
+#include <conio.h>
 
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
 
 #define LVERTEX_SHADER_PATH "laser.vert"
 #define LFRAGMENT_SHADER_PATH "laser.frag"
-
+using namespace irrklang;
 glm::vec3 lightPos(0.0f, 0.2f, 0.0f);
 glm::vec3 lightAmbient(0.5f, 0.5f, 0.5f);
-glm::vec3 lightDiffuse(0.9f, 0.9f, 0.7f);
+glm::vec3 lightDiffuse(0.700000f, 0.500000f, 1.00000f);
 glm::vec3 lightSpecular(1.0f, 1.0f, 1.0f);
 
 // An example application that renders a simple cube
@@ -655,12 +658,43 @@ class ExampleApp : public RiftApp {
 	Level * level;
 	Ball * ball;
 	Shader * shader = NULL;
-
+	ISound* music;
+	ISound* sheild;
+	ISoundEngine *SoundEngine;
 	GLint shaderProgram;
 public:
 	ExampleApp() { }
 
 protected:
+	
+	void initSound() {
+		irrklang::ISoundDeviceList* deviceList = createSoundDeviceList();
+
+		printf("Devices available:\n\n");
+
+		for (int i = 0; i<deviceList->getDeviceCount(); ++i)
+			printf("%d: %s\n", i, deviceList->getDeviceDescription(i));
+
+		printf("\nselect a device using the number (or press any key to use default):\n\n");
+		int deviceNumber = _getch() - '0';
+
+		// create device with the selected driver
+
+		const char* deviceID = deviceList->getDeviceID(deviceNumber);
+
+		SoundEngine = createIrrKlangDevice(irrklang::ESOD_AUTO_DETECT,
+			irrklang::ESEO_DEFAULT_OPTIONS,
+			deviceID);
+
+		deviceList->drop(); // delete device list
+
+		music = SoundEngine->play2D("Assets/sound/level.mp3", true, false, true);
+		music->setVolume(0.5);
+		SoundEngine->setListenerPosition(vec3df(0, 0, 3.0),
+			vec3df(0, 0, 1));
+
+	}
+	
 	void initGl() override {
 		RiftApp::initGl();
 		glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
@@ -674,7 +708,7 @@ protected:
 		ball = new Ball();
 		players.push_back(Player(players.size() + 1, new Hand(_session, frame, false)));
 		players.push_back(Player(players.size() + 1, new Hand(true)));
-
+		initSound();
 	}
 
 	void shutdownGl() override {
@@ -694,8 +728,11 @@ protected:
 
 	void update() {
 		bool triggerr = false;
-
+		SoundEngine->setListenerPosition(vec3df(headPose.Position.x, headPose.Position.y, headPose.Position.z),
+			vec3df(headPose.Orientation.x, headPose.Orientation.y, headPose.Orientation.z));
 		ball->update();
+		if(frame%30 == 0)
+			ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.0f);
 		for (int i = 0; i < players.size(); ++i) {
 			if (players[i].hand->isLeap) {
 				cout << "leap" << endl;
@@ -711,11 +748,21 @@ protected:
 				players[i].hand->HandPose.Position.z += 2.5f;
 				players[i].update(NULL, NULL);
 			}
-
 			if (intersect(i) && ball->lastPlayer != players[i].playerNum)
-			{
+			{	char a;
+				vec3 s = ball->calcCenterPoint();
+				sheild = SoundEngine->play3D("Assets/sound/clang.wav",
+					vec3df(s.x, s.y, s.z), false, false, true);
+				sheild->setMinDistance(1.0f);
 				ball->velocity = -ball->velocity;
 				ball->lastPlayer = players[i].playerNum;
+				glm::quat direc = ovr::toGlm(players[i].hand->HandPose.Orientation);
+				vec3 reflect = glm::mat4_cast(direc)* vec4(0.0, 0.0, 1.0f, 1.0f);
+				cout << reflect.x << reflect.y << reflect.z << endl;
+				//cin >> a;
+				ball->velocity = reflect*-0.15f;
+				if(i = 1)
+					ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 1.0f);
 			}
 		}
 	}

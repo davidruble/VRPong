@@ -44,7 +44,7 @@ void main(void) {
    if(texture(texture_diffuse1, Texcoords).r == 0.0f && texture(texture_diffuse1, Texcoords).g == 0.0f && texture(texture_diffuse1, Texcoords).b == 0.0f)
 		diffuse = light.diffuse * (diff * material.diffuse);
    else
-		diffuse = light.diffuse * (diff * material.diffuse * texture(texture_diffuse1, Texcoords).rgb);
+		diffuse = light.diffuse * (diff *  texture(texture_diffuse1, Texcoords).rgb);
   
    //Specular
    vec3 viewDir = normalize(viewPos - fpos);
