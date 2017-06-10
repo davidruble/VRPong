@@ -268,6 +268,11 @@ void update() {
 			sheild->setMinDistance(1.0f);
 			ball->velocity = -ball->velocity;
 			ball->lastPlayer = players[i].playerNum;
+			glm::quat direc = ovr::toGlm(players[i].hand->HandPose.Orientation);
+			vec3 reflect = glm::mat4_cast(direc)* vec4(0.0, 0.0, 1.0f, 1.0f);
+			cout << reflect.x << reflect.y << reflect.z << endl;
+			//cin >> a;
+			ball->velocity = reflect*-0.15f;
 		}
 	}
 }

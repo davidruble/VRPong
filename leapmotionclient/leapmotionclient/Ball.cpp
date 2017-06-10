@@ -1,27 +1,39 @@
 #include "Ball.h"
 
 
+
 Ball::Ball() : Model(BALL_PATH)
 {
 	for (GLuint i = 0; i < this->meshes.size(); i++) {
 		meshes[i].toWorld = glm::scale(meshes[i].toWorld, glm::vec3(0.1f, 0.1f, 0.1f));
 	}
-	velocity = glm::vec3(0.0f, 0.0f, 0.15f);
+	velocity = glm::vec3(0.0f, 0.0f, 0.25f);
 	released = true;
 	lastPlayer = 0;
 }
 
 void Ball::update() {
-	if (released) {
-		for (GLuint i = 0; i < this->meshes.size(); i++) {
-			meshes[i].toWorld = glm::translate(meshes[i].toWorld, velocity);
-		}
-	}
 	glm::vec3 cent = calcCenterPoint();
 	if (cent.z > 3.0f || cent.z < -3.0f)
 	{
 		for (GLuint i = 0; i < this->meshes.size(); i++) {
-			meshes[i].toWorld = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)), velocity);
+			meshes[i].toWorld = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)), glm::vec3(0.0f, 0.0f, 0.25f));
+		}
+		velocity = glm::vec3(0.0f, 0.0f, 0.25f);
+		lastPlayer = 0;
+	}
+	if (cent.x > 1.0f || cent.x < -1.0f)
+	{
+		velocity = glm::reflect(velocity, glm::vec3(1.0f, 0.0f, 0.0f));
+	}
+	if (cent.y > 0.7f || cent.y < -1.0f)
+	{
+
+		velocity = glm::reflect(velocity, glm::vec3(0.0f, 1.0f, 0.0f));
+	}
+	if (released) {
+		for (GLuint i = 0; i < this->meshes.size(); i++) {
+			meshes[i].toWorld = glm::translate(meshes[i].toWorld, velocity);
 		}
 	}
 }

@@ -63,7 +63,7 @@ void Hand::pollLeapInput(Leap::Controller & controller, Player & player) {
 				Leap::Vector pos = (*hl).palmPosition();
 				player.hand->HandPose.Position.x = -pos.x / 100.0f;
 				player.hand->HandPose.Position.y = pos.y / 100.0f - 1.0f;
-				player.hand->HandPose.Position.z = -pos.z / 100.0f - 2.3f;
+				player.hand->HandPose.Position.z = -pos.z / 100.0f - 2.0f;
 
 				player.hand->HandPose.Orientation.x = (*hl).palmNormal().x;
 				player.hand->HandPose.Orientation.y = -(*hl).palmNormal().y;
