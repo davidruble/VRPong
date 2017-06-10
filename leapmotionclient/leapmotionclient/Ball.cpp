@@ -1,7 +1,6 @@
 #include "Ball.h"
 
 
-
 Ball::Ball() : Model(BALL_PATH)
 {
 	for (GLuint i = 0; i < this->meshes.size(); i++) {

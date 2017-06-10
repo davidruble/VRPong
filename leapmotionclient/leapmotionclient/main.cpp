@@ -8,12 +8,17 @@
 #include "Camera.h"
 #include "LeapListener.h"
 #include <iostream>
+#include <stdio.h>
+#include <conio.h>
+#include <irrKlang\irrKlang.h>
+using namespace irrklang;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 void initGame();
+void initSound();
 void update();
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -28,9 +33,12 @@ bool firstMouse = true;
 LeapListener listener;
 Leap::Controller controller;
 const int playerid = 2;
+ISoundEngine *SoundEngine;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+ISound* music;
+ISound* sheild;
 
 
 #include "model.h"
@@ -102,6 +110,7 @@ int main()
     // build and compile shaders
     // -------------------------
 	initGame();
+	initSound();
     
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -118,6 +127,8 @@ int main()
 
         // input
         // -----
+		SoundEngine->setListenerPosition(vec3df(camera1.Position.x, camera1.Position.y, camera1.Position.z),
+			vec3df(-camera1.Front.x, -camera1.Front.y, -camera1.Front.z));
 		update();
         processInput(window);
 
@@ -196,6 +207,33 @@ int main()
     return 0;
 }
 
+void initSound() {
+	irrklang::ISoundDeviceList* deviceList = createSoundDeviceList();
+
+	printf("Devices available:\n\n");
+
+	for (int i = 0; i<deviceList->getDeviceCount(); ++i)
+		printf("%d: %s\n", i, deviceList->getDeviceDescription(i));
+
+	printf("\nselect a device using the number (or press any key to use default):\n\n");
+	int deviceNumber = _getch() - '0';
+
+	// create device with the selected driver
+
+	const char* deviceID = deviceList->getDeviceID(deviceNumber);
+
+	SoundEngine = createIrrKlangDevice(irrklang::ESOD_AUTO_DETECT,
+		irrklang::ESEO_DEFAULT_OPTIONS,
+		deviceID);
+
+	deviceList->drop(); // delete device list
+
+	music = SoundEngine->play2D("Assets/sound/level.mp3", true, false, true);
+	music->setVolume(0.5);
+	SoundEngine->setListenerPosition(vec3df(0, 0, -3.0),
+		vec3df(0, 0, 1));
+}
+
 bool intersect(int playernum) {
 	glm::vec3 center = ball->calcCenterPoint();
 	glm::vec3 min = players[playernum].hand->min;
@@ -224,6 +262,10 @@ void update() {
 		}
 		if (intersect(i) && ball->lastPlayer != players[i].playerNum)
 		{
+			vec3 s = ball->calcCenterPoint();
+			sheild = SoundEngine->play3D("Assets/sound/clang.wav",
+				vec3df(s.x, s.y, s.z), false, false, true);
+			sheild->setMinDistance(1.0f);
 			ball->velocity = -ball->velocity;
 			ball->lastPlayer = players[i].playerNum;
 		}
