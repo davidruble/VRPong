@@ -9,7 +9,7 @@ class Player
 public:
 	Player();
 	Player(int playernum, Hand * phand);
-	void Draw(Shader shader);
+	void Draw(Shader shader, int playernum);
 	void update(ovrSession, long long);
 	~Player();
 	int playerNum;

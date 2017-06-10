@@ -309,7 +309,7 @@ public:
 
 class RiftApp : public GlfwApp, public RiftManagerApp {
 public:
-
+	ovrPosef headPose;
 private:
 	GLuint _fbo{ 0 };
 	GLuint _depthBuffer{ 0 };
@@ -447,7 +447,7 @@ protected:
 			const auto& vp = _sceneLayer.Viewport[eye];
 			glViewport(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
 			_sceneLayer.RenderPose[eye] = eyePoses[eye];
-
+			headPose = eyePoses[0];
 			renderScene(_eyeProjections[eye], ovr::toGlm(eyePoses[eye]), eyePoses[eye]);
 		});
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
@@ -706,6 +706,7 @@ protected:
 			}
 			else {
 				cout << "not leap" << endl;
+				players[i].head->HeadPose = headPose;
 				players[i].hand->pollOculusInput(_session, frame);
 				players[i].hand->HandPose.Position.z += 2.5f;
 				players[i].update(NULL, NULL);
@@ -739,7 +740,7 @@ protected:
 		ball->Draw(*shader);
 		level->Draw(*shader);
 		for (int i = 0; i < players.size(); ++i) {
-			players[i].Draw(*shader);
+			players[i].Draw(*shader, 1);
 		}
 	}
 };

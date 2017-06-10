@@ -7,8 +7,8 @@ Player::Player(int playernum, Hand * phand)
 	head = new Head();
 }
 
-void Player::Draw(Shader shader) {
-	if (playerNum == 1) {
+void Player::Draw(Shader shader, int playernum) {
+	if (playernum != playerNum) {
 		head->Draw(shader);
 	}
 	hand->Draw(shader);
@@ -18,7 +18,7 @@ void Player::update(ovrSession _session, long long frame) {
 	hand->update();
 	if (hand->isLeap) {
 		head->HeadPose = hand->HandPose;
-		head->update(hand->isLeap);
+		head->update(true);
 	}
 	else {
 		head->update(false);
