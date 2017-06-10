@@ -2,7 +2,7 @@
 
 
 
-Ball::Ball(): Model (BALL_PATH)
+Ball::Ball() : Model(BALL_PATH)
 {
 	for (GLuint i = 0; i < this->meshes.size(); i++) {
 		meshes[i].toWorld = glm::scale(meshes[i].toWorld, glm::vec3(0.1f, 0.1f, 0.1f));
@@ -16,6 +16,13 @@ void Ball::update() {
 	if (released) {
 		for (GLuint i = 0; i < this->meshes.size(); i++) {
 			meshes[i].toWorld = glm::translate(meshes[i].toWorld, velocity);
+		}
+	}
+	glm::vec3 cent = calcCenterPoint();
+	if (cent.z > 3.0f || cent.z < -3.0f)
+	{
+		for (GLuint i = 0; i < this->meshes.size(); i++) {
+			meshes[i].toWorld = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)), velocity);
 		}
 	}
 }

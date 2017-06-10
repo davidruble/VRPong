@@ -151,7 +151,7 @@ int main()
 		ball->Draw(*shader);
 		level->Draw(*shader);
 		for (int i = 0; i < players.size(); ++i) {
-			players[i].Draw(*shader);
+			players[i].Draw(*shader, 2);
 		}
 
 		glClear(GL_DEPTH_BUFFER_BIT);
@@ -178,7 +178,7 @@ int main()
 		ball->Draw(*shader);
 		level->Draw(*shader);
 		for (int i = 0; i < players.size(); ++i) {
-			players[i].Draw(*shader);
+			players[i].Draw(*shader, 2);
 		}
 
 		glColorMask(true, true, true, true);
