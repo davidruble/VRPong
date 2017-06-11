@@ -254,8 +254,14 @@ bool intersect(int playernum) {
 
 void update() {
 	bool triggerr = false;
-	ball->update();
 	int frame = (int)currentFrame;
+
+	ball->update();
+	if (ball->outOfBounds)
+	{
+		client->async_call("setLastPlayer", ball->lastPlayer);
+		ball->outOfBounds = false;
+	}
 
 	// TODO: set the update rates lower and interpolate to new remote positions
 	for (int i = 0; i < players.size(); ++i) 
@@ -308,6 +314,7 @@ void update() {
 			players[i].update(NULL, NULL);
 		}
 
+		ball->lastPlayer = client->call("getLastPlayer").as<int>();
 		if (intersect(i) && ball->lastPlayer != players[i].playerNum)
 		{
 			vec3 s = ball->calcCenterPoint();
@@ -316,6 +323,7 @@ void update() {
 			sheild->setMinDistance(1.0f);
 			ball->velocity = -ball->velocity;
 			ball->lastPlayer = players[i].playerNum;
+			client->async_call("setLastPlayer", players[i].playerNum);
 			glm::quat direc = ovr::toGlm(players[i].hand->HandPose.Orientation);
 			vec3 reflect = glm::mat4_cast(direc)* vec4(0.0, 0.0, 1.0f, 1.0f);
 			cout << reflect.x << reflect.y << reflect.z << endl;

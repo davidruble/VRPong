@@ -21,6 +21,7 @@ void Ball::update() {
 		}
 		velocity = glm::vec3(0.0f, 0.0f, 0.25f);
 		lastPlayer = 0;
+		outOfBounds = true;
 	}
 	if (cent.x > 1.0f || cent.x < -1.0f)
 	{
