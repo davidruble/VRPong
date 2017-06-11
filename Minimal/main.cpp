@@ -640,6 +640,7 @@ public:
 #include <irrKlang\irrKlang.h>
 #include <stdio.h>
 #include <conio.h>
+#include "rpc/client.h"
 
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
@@ -662,6 +663,8 @@ class ExampleApp : public RiftApp {
 	ISound* sheild;
 	ISoundEngine *SoundEngine;
 	GLint shaderProgram;
+	rpc::client* client;
+
 public:
 	ExampleApp() { }
 
@@ -709,10 +712,16 @@ protected:
 		players.push_back(Player(players.size() + 1, new Hand(_session, frame, false)));
 		players.push_back(Player(players.size() + 1, new Hand(true)));
 		initSound();
+
+		// server test
+		client = new rpc::client("127.0.0.1", 8080);
+		auto result = client->call("test", "KAKAPOOPOO").as<string>();
+		cout << "The result is: " << result << endl;
 	}
 
 	void shutdownGl() override {
 		//cubeScene.reset();
+		delete client;
 		exit(1);
 	}
 
