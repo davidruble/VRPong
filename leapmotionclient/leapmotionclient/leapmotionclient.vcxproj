@@ -119,7 +119,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>irrKlang.lib;glfw3.lib;Leap.lib;LibOVR.lib;SOIL.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>irrKlang.lib;glfw3.lib;Leap.lib;LibOVR.lib;SOIL.lib;opengl32.lib;rpc.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -160,6 +160,7 @@ xcopy /yr "$(SolutionDir)lib\ikpFlac.dll" "$(TargetDir)"</Command>
     <ClInclude Include="Model.h" />
     <ClInclude Include="OVRUTIL.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="SerializablePose.h" />
     <ClInclude Include="shader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
