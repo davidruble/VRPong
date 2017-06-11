@@ -1,8 +1,6 @@
 #ifndef SERIALIZABLE_POSE_H
 #define SERIALIZABLE_POSE_H
 
-// TODO: copy over to leap branch and change to work with leap poses
-
 #include <LibOVR/OVR_CAPI.h>
 #include <rpc.h>
 

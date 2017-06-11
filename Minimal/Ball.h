@@ -15,5 +15,6 @@ public:
 	glm::mat4 toWorld;
 	int lastPlayer;
 	bool released;
+	bool outOfBounds;
 };
 

@@ -754,9 +754,23 @@ protected:
 		bool triggerr = false;
 		SoundEngine->setListenerPosition(vec3df(headPose.Position.x, headPose.Position.y, headPose.Position.z),
 			vec3df(headPose.Orientation.x, headPose.Orientation.y, headPose.Orientation.z));
-		ball->update();
 		if(frame%30 == 0)
 			ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.0f);
+
+		ball->update();
+		if (ball->outOfBounds)
+		{
+			try
+			{
+				client->async_call("setLastPlayer", ball->lastPlayer);
+				ball->outOfBounds = false;
+			}
+			catch (rpc::rpc_error& e)
+			{
+				cerr << "Unable to set last player!" << endl;
+				cerr << "Reason: " << e.what() << endl;
+			}
+		}
 		
 		// TODO: set the update rates lower and interpolate to new remote positions
 		for (int i = 0; i < players.size(); ++i) {
@@ -810,6 +824,18 @@ protected:
 				}
 			}
 
+			// get the updated ball position
+			try
+			{
+				ball->lastPlayer = client->call("getLastPlayer").as<int>();
+			}
+			catch (rpc::rpc_error& e)
+			{
+				cerr << "Unable to get last player!" << endl;
+				cerr << "Reason: " << e.what() << endl;
+			}
+
+			// check for a collision between a player's hands and the ball
 			if (intersect(i) && ball->lastPlayer != players[i].playerNum)
 			{	char a;
 				vec3 s = ball->calcCenterPoint();
@@ -817,7 +843,19 @@ protected:
 					vec3df(s.x, s.y, s.z), false, false, true);
 				sheild->setMinDistance(1.0f);
 				ball->velocity = -ball->velocity;
-				ball->lastPlayer = players[i].playerNum;
+
+				// update the last player to touch the ball
+				try
+				{
+					ball->lastPlayer = players[i].playerNum;
+					client->async_call("setLastPlayer", players[i].playerNum);
+				}
+				catch (rpc::rpc_error& e)
+				{
+					cerr << "Unable to set last player!" << endl;
+					cerr << "Reason: " << e.what() << endl;
+				}
+
 				glm::quat direc = ovr::toGlm(players[i].hand->HandPose.Orientation);
 				vec3 reflect = glm::mat4_cast(direc)* vec4(0.0, 0.0, 1.0f, 1.0f);
 				cout << reflect.x << reflect.y << reflect.z << endl;
