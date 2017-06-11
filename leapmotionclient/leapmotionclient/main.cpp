@@ -10,6 +10,12 @@
 #include <iostream>
 #include <stdio.h>
 #include <conio.h>
+
+// server includes
+#include "rpc/client.h"
+#include "rpc/rpc_error.h"
+#include "SerializablePose.h"
+
 #include <irrKlang\irrKlang.h>
 using namespace irrklang;
 
@@ -59,14 +65,16 @@ glm::vec3 lightAmbient(0.5f, 0.5f, 0.5f);
 glm::vec3 lightDiffuse(0.9f, 0.9f, 0.7f);
 glm::vec3 lightSpecular(1.0f, 1.0f, 1.0f);
 
-// An example application that renders a simple cube
-	vector<Player> players;
-	Level * level;
-	Ball * ball;
-	Shader * shader = NULL;
+vector<Player> players;
+Level * level;
+Ball * ball;
+Shader * shader = NULL;
+GLint shaderProgram;
+rpc::client* client; 
+ovrPosef remoteHeadPose;
+ovrPosef remoteHandPose;
 
-	GLint shaderProgram;
-
+float currentFrame;
 
 
 int main()
@@ -121,7 +129,7 @@ int main()
     {
         // per-frame time logic
         // --------------------
-        float currentFrame = glfwGetTime();
+        currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
@@ -193,7 +201,6 @@ int main()
 		}
 
 		glColorMask(true, true, true, true);
-		cout << "bro" << endl;
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -204,6 +211,7 @@ int main()
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
+	delete client;
     return 0;
 }
 
@@ -246,20 +254,60 @@ bool intersect(int playernum) {
 
 void update() {
 	bool triggerr = false;
-
 	ball->update();
-	for (int i = 0; i < players.size(); ++i) {
-		if (players[i].hand->isLeap) {
-			cout << "leap" << endl;
+	int frame = (int)currentFrame;
+
+	// TODO: set the update rates lower and interpolate to new remote positions
+	for (int i = 0; i < players.size(); ++i) 
+	{
+		if (players[i].hand->isLeap) 
+		{
+			//cout << "leap" << endl;
 			players[i].hand->pollLeapInput(controller, players[i]);
 			players[i].update(NULL, NULL);
-		}else {
-			cout << "not leap" << endl;
+
+			// send an updated position to the server every certain number of frames
+			if (frame % 2 == 0)
+			{
+				//cout << "Updating remote pose" << endl;
+				try
+				{
+					client->async_call("setPose", LEAP, HAND, serializePose(players[i].hand->HandPose));
+					client->async_call("setPose", LEAP, HEAD, serializePose(players[i].head->HeadPose));
+				}
+				catch (rpc::rpc_error& e)
+				{
+					cerr << "Unable to send updated poses to server!" << endl;
+					cerr << "Reason: " << e.what() << endl;
+				}
+			}
+		}
+		else 
+		{
+			// get an updated position from the server every certain number of frames
+			if (frame % 2 == 0)
+			{
+				//cout << "Getting remote pose" << endl;
+				try
+				{
+					remoteHeadPose = deserializePose(client->call("getPose", OCULUS, HEAD).as<s_Pose>());
+					remoteHandPose = deserializePose(client->call("getPose", OCULUS, HAND).as<s_Pose>());
+				}
+				catch (rpc::rpc_error& e)
+				{
+					cerr << "Unable to retrieve updated poses from server!" << endl;
+					cerr << "Reason: " << e.what() << endl;
+				}
+			}
+
+			//cout << "not leap" << endl;
 			//set hand and head pose here fromw/e we got from network
-			//players[i].head->HeadPose = shit;
-			//players[i].hand->HandPose = shit;
+			// TODO: interpolate to new position for smoothness
+			players[i].head->HeadPose = remoteHeadPose;
+			players[i].hand->HandPose = remoteHandPose;
 			players[i].update(NULL, NULL);
 		}
+
 		if (intersect(i) && ball->lastPlayer != players[i].playerNum)
 		{
 			vec3 s = ball->calcCenterPoint();
@@ -286,6 +334,19 @@ void initGame() {
 	players.push_back(Player(players.size() + 1, new Hand(true)));
 	//controller.addListener(listener);
 	//controller.setPolicy(Leap::Controller::POLICY_ALLOW_PAUSE_RESUME);
+
+	// start the client and initialize the poses for this player on the server
+	client = new rpc::client("127.0.0.1", 8080);
+	try
+	{
+		client->call("setPose", LEAP, HEAD, serializePose(players[1].head->HeadPose));
+		client->call("setPose", LEAP, HAND, serializePose(players[1].hand->HandPose));
+	}
+	catch (rpc::rpc_error& e)
+	{
+		cerr << "Unable to set initial poses from server!" << endl;
+		cerr << "Reason: " << e.what() << endl;
+	}
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
