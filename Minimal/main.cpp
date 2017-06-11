@@ -768,8 +768,8 @@ protected:
 					//cout << "Getting remote pose" << endl;
 					try
 					{
-						remoteHeadPose = deserializePose(client->call("getPose", OCULUS, HEAD).as<s_Pose>());
-						remoteHandPose = deserializePose(client->call("getPose", OCULUS, HAND).as<s_Pose>());
+						remoteHeadPose = deserializePose(client->call("getPose", LEAP, HEAD).as<s_Pose>());
+						remoteHandPose = deserializePose(client->call("getPose", LEAP, HAND).as<s_Pose>());
 					}
 					catch (rpc::rpc_error& e)
 					{
@@ -781,7 +781,7 @@ protected:
 				//cout << "leap" << endl;
 				//set hand and head pose here fromw/e we got from network
 				// TODO: interpolate to new position for smoothness
-				players[i].head->HeadPose = remoteHandPose; // TODO: fix this back to head
+				players[i].head->HeadPose = remoteHeadPose;
 				players[i].hand->HandPose = remoteHandPose;
 				players[i].update(NULL, NULL);
 			}
