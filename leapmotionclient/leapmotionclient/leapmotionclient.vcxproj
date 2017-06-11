@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>\\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\Visual Studio 2015\Projects\leapmotionclient\include;$(IncludePath)</IncludePath>
-    <LibraryPath>\\acsnfs4.ucsd.edu\cifshomes\702\nganjehl\Visual Studio 2015\Projects\leapmotionclient\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -123,10 +123,14 @@
       <AdditionalLibraryDirectories>$(SolutionDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy /yr "$(SolutionDir)lib\Leap.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /yr "$(SolutionDir)lib\Leap.dll" "$(TargetDir)"
+xcopy /yr "$(SolutionDir)lib\irrKlang.dll" "$(TargetDir)"
+xcopy /yr "$(SolutionDir)lib\ikpMP3.dll" "$(TargetDir)"
+xcopy /yr "$(SolutionDir)lib\ikpFlac.dll" "$(TargetDir)"</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /yr "$(SolutionDir)lib\Leap.dll" "$(TargetDir)"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -23,6 +23,17 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+leapmotionclient/[Dd]ebug/
+leapmotionclient/[Dd]ebugPublic/
+leapmotionclient/[Rr]elease/
+leapmotionclient/[Rr]eleases/
+leapmotionclient/x64/
+leapmotionclient/x86/
+leapmotionclient/bld/
+leapmotionclient/[Bb]in/
+leapmotionclient/[Oo]bj/
+leapmotionclient/[Ll]og/
+
 
 # Visual Studio 2015 cache/options directory
 .vs/
