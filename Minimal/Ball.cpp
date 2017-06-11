@@ -5,7 +5,7 @@
 Ball::Ball() : Model(BALL_PATH)
 {
 	for (GLuint i = 0; i < this->meshes.size(); i++) {
-		meshes[i].toWorld = glm::scale(meshes[i].toWorld, glm::vec3(0.1f, 0.1f, 0.1f));
+		meshes[i].toWorld = glm::scale(meshes[i].toWorld, glm::vec3(0.2f, 0.2f, 0.2f));
 	}
 	velocity = glm::vec3(0.0f, 0.0f, 0.25f);
 	released = true;

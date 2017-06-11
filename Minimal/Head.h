@@ -4,6 +4,7 @@
 #include "LibOVR/OVR_CAPI.h"
 #include "LibOVR/OVR_CAPI_GL.h"
 #define HEAD_PATH "Assets/head/untitled.obj"
+
 class Head : protected Model
 {
 public:

@@ -5,8 +5,8 @@
 // The Oculus VR C API provides access to information about the HMD
 //
 
-#include <OVR_CAPI.h>
-#include <OVR_CAPI_GL.h>
+#include <LibOVR/OVR_CAPI.h>
+#include <LibOVR/OVR_CAPI_GL.h>
 
 
 #include <glm/glm.hpp>
