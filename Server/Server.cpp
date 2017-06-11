@@ -6,23 +6,10 @@
 #include "SerializablePose.h"
 using namespace std;
 
-#define OCULUS 0
-#define LEAP 1
-
-#define HEAD 0
-#define HAND 1
-
 static s_Pose oculus_headPose;
 static s_Pose oculus_handPose;
 static s_Pose leap_headPose;
 static s_Pose leap_handPose;
-
-// test RPC to ensure we can communicate with the server
-string test(string str)
-{
-	cout << "In server test function. Input string is: " << str << endl;
-	return "Server response!";
-}
 
 // setter for head and hand pose
 void setPose(int player, int whichPose, s_Pose pose)
@@ -102,7 +89,6 @@ int main(int argc, char* argv[])
 	cout << "Waiting for RPC calls..." << endl;
 	
 	// bind the funtions so they can be called remotely
-	srv.bind("test", &test);
 	srv.bind("setPose", &setPose);
 	srv.bind("getPose", &getPose);
 

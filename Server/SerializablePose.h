@@ -1,8 +1,16 @@
 #ifndef SERIALIZABLE_POSE_H
 #define SERIALIZABLE_POSE_H
 
+// TODO: copy over to leap branch and change to work with leap poses
+
 #include <LibOVR/OVR_CAPI.h>
 #include <rpc.h>
+
+// shared defines for RPC parameters
+#define OCULUS 0
+#define LEAP 1
+#define HEAD 0
+#define HAND 1
 
 // serializable pose object
 struct s_Pose

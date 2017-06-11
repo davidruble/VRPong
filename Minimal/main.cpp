@@ -646,15 +646,6 @@ public:
 #include "rpc/rpc_error.h"
 #include "SerializablePose.h"
 
-// defines for RPC parameters
-#define OCULUS 0
-#define LEAP 1
-#define HEAD 0
-#define HAND 1
-
-// TODO: TEMPORARY
-bool gotPoseFromServer = false;
-
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
 
@@ -677,6 +668,8 @@ class ExampleApp : public RiftApp {
 	ISoundEngine *SoundEngine;
 	GLint shaderProgram;
 	rpc::client* client;
+	ovrPosef remoteHeadPose;
+	ovrPosef remoteHandPose;
 
 public:
 	ExampleApp() { }
@@ -726,14 +719,18 @@ protected:
 		players.push_back(Player(players.size() + 1, new Hand(true)));
 		initSound();
 
-		// server test
+		// start the client and initialize the poses for this player on the server
 		client = new rpc::client("127.0.0.1", 8080);
-		auto result = client->call("test", "KAKAPOOPOO").as<string>();
-		cout << "The result is: " << result << endl;
-
-		// initialize the poses for this player on the server
-		client->call("setPose", OCULUS, HEAD, serializePose(players[0].head->HeadPose));
-		client->call("setPose", OCULUS, HAND, serializePose(players[0].hand->HandPose));
+		try
+		{
+			client->call("setPose", OCULUS, HEAD, serializePose(players[0].head->HeadPose));
+			client->call("setPose", OCULUS, HAND, serializePose(players[0].hand->HandPose));
+		}
+		catch (rpc::rpc_error& e)
+		{
+			cerr << "Unable to set initial poses from server!" << endl;
+			cerr << "Reason: " << e.what() << endl;
+		}
 	}
 
 	void shutdownGl() override {
@@ -752,45 +749,67 @@ protected:
 			(center.z >= min.z && center.z <= max.z);
 	}
 
-	void update() {
-		// TODO: TEMPORARY
-		if (!gotPoseFromServer && frame % 59 == 0)
-		{
-			cout << "Getting pose from server..." << endl;
-			try
-			{
-				ovrPosef oculusPose = deserializePose(client->call("getPose", OCULUS, HAND).as<s_Pose>());
-				cout << "Position: " << oculusPose.Position.x << ", " << oculusPose.Position.y << ", " << oculusPose.Position.z << endl;
-				gotPoseFromServer = true;
-			}
-			catch (rpc::rpc_error& e)
-			{
-				cerr << "Server error!" << endl;
-				cerr << e.what() << endl;
-			}
-		}
-
+	void update() 
+	{
 		bool triggerr = false;
 		SoundEngine->setListenerPosition(vec3df(headPose.Position.x, headPose.Position.y, headPose.Position.z),
 			vec3df(headPose.Orientation.x, headPose.Orientation.y, headPose.Orientation.z));
 		ball->update();
 		if(frame%30 == 0)
 			ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.0f);
+		
+		// TODO: set the update rates lower and interpolate to new remote positions
 		for (int i = 0; i < players.size(); ++i) {
-			if (players[i].hand->isLeap) {
+			if (players[i].hand->isLeap) 
+			{
+				// get an updated position from the server every certain number of frames
+				if (frame % 2 == 0)
+				{
+					//cout << "Getting remote pose" << endl;
+					try
+					{
+						remoteHeadPose = deserializePose(client->call("getPose", OCULUS, HEAD).as<s_Pose>());
+						remoteHandPose = deserializePose(client->call("getPose", OCULUS, HAND).as<s_Pose>());
+					}
+					catch (rpc::rpc_error& e)
+					{
+						cerr << "Unable to retrieve updated poses from server!" << endl;
+						cerr << "Reason: " << e.what() << endl;
+					}
+				}
+
 				//cout << "leap" << endl;
-				////set hand and head pose here fromw/e we got from network
-				//players[i].head->HeadPose = shit;
-				//players[i].hand->HandPose = shit;
+				//set hand and head pose here fromw/e we got from network
+				// TODO: interpolate to new position for smoothness
+				players[i].head->HeadPose = remoteHandPose; // TODO: fix this back to head
+				players[i].hand->HandPose = remoteHandPose;
 				players[i].update(NULL, NULL);
 			}
-			else {
+			else 
+			{
 				//cout << "not leap" << endl;
 				players[i].head->HeadPose = headPose;
 				players[i].hand->pollOculusInput(_session, frame);
 				players[i].hand->HandPose.Position.z += 2.5f;
 				players[i].update(NULL, NULL);
+
+				// send an updated position to the server every certain number of frames
+				if (frame % 2 == 0)
+				{
+					//cout << "Updating remote pose" << endl;
+					try
+					{
+						client->async_call("setPose", OCULUS, HAND, serializePose(players[i].hand->HandPose));
+						client->async_call("setPose", OCULUS, HEAD, serializePose(headPose));
+					}
+					catch (rpc::rpc_error& e)
+					{
+						cerr << "Unable to send updated poses to server!" << endl;
+						cerr << "Reason: " << e.what() << endl;
+					}
+				}
 			}
+
 			if (intersect(i) && ball->lastPlayer != players[i].playerNum)
 			{	char a;
 				vec3 s = ball->calcCenterPoint();
