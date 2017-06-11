@@ -10,6 +10,7 @@ Ball::Ball() : Model(BALL_PATH)
 	velocity = glm::vec3(0.0f, 0.0f, 0.25f);
 	released = true;
 	lastPlayer = 0;
+	outOfBounds = false;
 }
 
 void Ball::update() {
