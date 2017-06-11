@@ -640,7 +640,20 @@ public:
 #include <irrKlang\irrKlang.h>
 #include <stdio.h>
 #include <conio.h>
+
+// server includes
 #include "rpc/client.h"
+#include "rpc/rpc_error.h"
+#include "SerializablePose.h"
+
+// defines for RPC parameters
+#define OCULUS 0
+#define LEAP 1
+#define HEAD 0
+#define HAND 1
+
+// TODO: TEMPORARY
+bool gotPoseFromServer = false;
 
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
@@ -717,6 +730,10 @@ protected:
 		client = new rpc::client("127.0.0.1", 8080);
 		auto result = client->call("test", "KAKAPOOPOO").as<string>();
 		cout << "The result is: " << result << endl;
+
+		// initialize the poses for this player on the server
+		client->call("setPose", OCULUS, HEAD, serializePose(players[0].head->HeadPose));
+		client->call("setPose", OCULUS, HAND, serializePose(players[0].hand->HandPose));
 	}
 
 	void shutdownGl() override {
@@ -736,6 +753,23 @@ protected:
 	}
 
 	void update() {
+		// TODO: TEMPORARY
+		if (!gotPoseFromServer && frame % 59 == 0)
+		{
+			cout << "Getting pose from server..." << endl;
+			try
+			{
+				ovrPosef oculusPose = deserializePose(client->call("getPose", OCULUS, HAND).as<s_Pose>());
+				cout << "Position: " << oculusPose.Position.x << ", " << oculusPose.Position.y << ", " << oculusPose.Position.z << endl;
+				gotPoseFromServer = true;
+			}
+			catch (rpc::rpc_error& e)
+			{
+				cerr << "Server error!" << endl;
+				cerr << e.what() << endl;
+			}
+		}
+
 		bool triggerr = false;
 		SoundEngine->setListenerPosition(vec3df(headPose.Position.x, headPose.Position.y, headPose.Position.z),
 			vec3df(headPose.Orientation.x, headPose.Orientation.y, headPose.Orientation.z));
@@ -744,14 +778,14 @@ protected:
 			ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.0f);
 		for (int i = 0; i < players.size(); ++i) {
 			if (players[i].hand->isLeap) {
-				cout << "leap" << endl;
+				//cout << "leap" << endl;
 				////set hand and head pose here fromw/e we got from network
 				//players[i].head->HeadPose = shit;
 				//players[i].hand->HandPose = shit;
 				players[i].update(NULL, NULL);
 			}
 			else {
-				cout << "not leap" << endl;
+				//cout << "not leap" << endl;
 				players[i].head->HeadPose = headPose;
 				players[i].hand->pollOculusInput(_session, frame);
 				players[i].hand->HandPose.Position.z += 2.5f;

@@ -74,10 +74,10 @@ void Hand::pollLeapInput(Leap::Controller & controller, Player & player) {
 	}
 }
 bool Hand::update() {
-	cout << "starting update" << endl;
+	//cout << "starting update" << endl;
 	//transform hands
 	if (!isLeap) {
-		cout << "deg" << endl;
+		//cout << "deg" << endl;
 
 		for (GLuint i = 0; i < this->meshes.size(); i++) {
 			meshes[i].toWorld = glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f));
@@ -87,7 +87,7 @@ bool Hand::update() {
 		return false;
 	}
 	else {
-		cout << "update" << endl;
+		//cout << "update" << endl;
 		for (GLuint i = 0; i < this->meshes.size(); i++) {
 			meshes[i].toWorld = glm::translate(glm::scale(ovr::toGlm(HandPose), glm::vec3(0.05f, 0.05f, 0.05f)), glm::vec3(0.0f, -1.0f, -3.0f));
 		}
