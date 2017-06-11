@@ -24,6 +24,7 @@ void Player::update(ovrSession _session, long long frame) {
 		head->update(false);
 	}
 }
+
 Player::~Player()
 {
 }

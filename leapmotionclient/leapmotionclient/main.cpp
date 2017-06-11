@@ -57,9 +57,6 @@ ISound* sheild;
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
 
-#define LVERTEX_SHADER_PATH "laser.vert"
-#define LFRAGMENT_SHADER_PATH "laser.frag"
-
 glm::vec3 lightPos(0.0f, 0.2f, 0.0f);
 glm::vec3 lightAmbient(0.5f, 0.5f, 0.5f);
 glm::vec3 lightDiffuse(0.9f, 0.9f, 0.7f);
@@ -151,7 +148,6 @@ int main()
 		glColorMask(true, false, false, false);
 
 		shader->Use();
-
 		glUniform3fv(glGetUniformLocation(shader->Program, "light.position"), 1, &lightPos[0]);
 		glUniform3fv(glGetUniformLocation(shader->Program, "light.ambient"), 1, &lightAmbient[0]);
 		glUniform3fv(glGetUniformLocation(shader->Program, "light.diffuse"), 1, &lightDiffuse[0]);
@@ -169,16 +165,15 @@ int main()
 
 		ball->Draw(*shader);
 		level->Draw(*shader);
-		for (int i = 0; i < players.size(); ++i) {
+		for (int i = 0; i < players.size(); ++i) 
+		{
 			players[i].Draw(*shader, 2);
 		}
 
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glColorMask(false, true, true, false);
 
-
 		shader->Use();
-
 		glUniform3fv(glGetUniformLocation(shader->Program, "light.position"), 1, &lightPos[0]);
 		glUniform3fv(glGetUniformLocation(shader->Program, "light.ambient"), 1, &lightAmbient[0]);
 		glUniform3fv(glGetUniformLocation(shader->Program, "light.diffuse"), 1, &lightDiffuse[0]);
@@ -196,7 +191,8 @@ int main()
 
 		ball->Draw(*shader);
 		level->Draw(*shader);
-		for (int i = 0; i < players.size(); ++i) {
+		for (int i = 0; i < players.size(); ++i) 
+		{
 			players[i].Draw(*shader, 2);
 		}
 
@@ -215,7 +211,8 @@ int main()
     return 0;
 }
 
-void initSound() {
+void initSound() 
+{
 	irrklang::ISoundDeviceList* deviceList = createSoundDeviceList();
 
 	printf("Devices available:\n\n");
@@ -227,9 +224,7 @@ void initSound() {
 	int deviceNumber = _getch() - '0';
 
 	// create device with the selected driver
-
 	const char* deviceID = deviceList->getDeviceID(deviceNumber);
-
 	SoundEngine = createIrrKlangDevice(irrklang::ESOD_AUTO_DETECT,
 		irrklang::ESEO_DEFAULT_OPTIONS,
 		deviceID);
@@ -242,7 +237,8 @@ void initSound() {
 		vec3df(0, 0, 1));
 }
 
-bool intersect(int playernum) {
+bool intersect(int playernum) 
+{
 	glm::vec3 center = ball->calcCenterPoint();
 	glm::vec3 min = players[playernum].hand->min;
 	glm::vec3 max = players[playernum].hand->max;
@@ -252,7 +248,8 @@ bool intersect(int playernum) {
 		(center.z >= min.z && center.z <= max.z);
 }
 
-void update() {
+void update() 
+{
 	bool triggerr = false;
 	int frame = (int)currentFrame;
 
@@ -363,9 +360,9 @@ void update() {
 	}
 }
 
-void initGame() {
+void initGame() 
+{
 	shader = new Shader(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-	//SETUP INITIAL SCENE HERE
 	level = new Level();
 	ball = new Ball();
 	players.push_back(Player(players.size() + 1, new Hand(NULL, 0, true)));
@@ -374,7 +371,7 @@ void initGame() {
 	//controller.setPolicy(Leap::Controller::POLICY_ALLOW_PAUSE_RESUME);
 
 	// start the client and initialize the poses for this player on the server
-	client = new rpc::client("127.0.0.1", 8080);
+	client = new rpc::client(SERVER_IP, 8080);
 	try
 	{
 		client->call("setPose", LEAP, HEAD, serializePose(players[1].head->HeadPose));

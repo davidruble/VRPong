@@ -1,7 +1,5 @@
 #include "Ball.h"
 
-
-
 Ball::Ball() : Model(BALL_PATH)
 {
 	for (GLuint i = 0; i < this->meshes.size(); i++) {
@@ -57,9 +55,7 @@ glm::vec3 Ball::calcCenterPoint()
 
 void Ball::Draw(Shader shader)
 {
-
 	Model::Draw(shader);
-
 }
 
 Ball::~Ball()
