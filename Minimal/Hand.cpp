@@ -58,8 +58,8 @@ void Hand::pollLeapInput(Leap::Controller & controller, Player & player) {
 			int i = 0;
 			auto hl = hands.begin();
 			if ((*hl).isValid()) {
-				cout << (*hl).palmPosition().toString() << endl;
-				cout << i << endl;
+				//cout << (*hl).palmPosition().toString() << endl;
+				//cout << i << endl;
 				Leap::Vector pos = (*hl).palmPosition();
 				player.hand->HandPose.Position.x = -pos.x / 100.0f;
 				player.hand->HandPose.Position.y = pos.y / 100.0f - 1.0f;

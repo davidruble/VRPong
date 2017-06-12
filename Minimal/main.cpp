@@ -509,6 +509,11 @@ class ExampleApp : public RiftApp
 	rpc::client* client;
 	ovrPosef remoteHeadPose;
 	ovrPosef remoteHandPose;
+	bool initialized = false;
+	bool ready = false;
+	float deltaTime = 0.0f;
+	float lastFrame = 0.0f;
+	float currentFrame = 0.0f;
 
 public:
 	ExampleApp() { }
@@ -553,9 +558,9 @@ protected:
 		initSound();
 
 		// start the client and initialize the poses for this player on the server
-		client = new rpc::client(SERVER_IP, SERVER_PORT);
 		try
 		{
+			client = new rpc::client(SERVER_IP, SERVER_PORT);
 			client->call("setPose", OCULUS, HEAD, serializePose(players[0].head->HeadPose));
 			client->call("setPose", OCULUS, HAND, serializePose(players[0].hand->HandPose));
 		}
@@ -584,14 +589,41 @@ protected:
 
 	void update() 
 	{
+		currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		try
+		{
+			// let the server know oculus is ready
+			if (!initialized)
+			{
+				cout << "Initializing oculus..." << endl;
+				client->call("oculusReady");
+				initialized = true;
+			}
+
+			// Check if all players are connected
+			if (!ready)
+			{
+				while (!(ready = client->call("checkConnection").as<bool>()));
+				cout << "Starting program!" << endl;
+			}
+		}
+		catch (rpc::rpc_error& e)
+		{
+			cerr << "Unable to ready oculus!" << endl;
+			cerr << "Reason: " << e.what() << endl;
+		}
+
 		bool triggerr = false;
 		SoundEngine->setListenerPosition(vec3df(headPose.Position.x, headPose.Position.y, headPose.Position.z),
 			vec3df(headPose.Orientation.x, headPose.Orientation.y, headPose.Orientation.z));
 		if(frame%30 == 0)
 			ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.0f);
 
-		ball->update();
-		if (ball->outOfBounds)
+		ball->update(deltaTime);
+		/*if (ball->outOfBounds)
 		{
 			try
 			{
@@ -603,14 +635,14 @@ protected:
 				cerr << "Unable to set last player!" << endl;
 				cerr << "Reason: " << e.what() << endl;
 			}
-		}
+		}*/
 		
 		// TODO: set the update rates lower and interpolate to new remote positions
 		for (int i = 0; i < players.size(); ++i) {
 			if (players[i].hand->isLeap) 
 			{
 				// get an updated position from the server every certain number of frames
-				if (frame % 2 == 0)
+				if (frame % 1 == 0)
 				{
 					//cout << "Getting remote pose" << endl;
 					try
@@ -641,7 +673,7 @@ protected:
 				players[i].update(NULL, NULL);
 
 				// send an updated position to the server every certain number of frames
-				if (frame % 2 == 0)
+				if (frame % 1 == 0)
 				{
 					//cout << "Updating remote pose" << endl;
 					try
@@ -657,8 +689,8 @@ protected:
 				}
 			}
 
-			// get the updated ball position
-			try
+			// get the last player to hit
+			/*try
 			{
 				ball->lastPlayer = client->call("getLastPlayer").as<int>();
 			}
@@ -666,11 +698,12 @@ protected:
 			{
 				cerr << "Unable to get last player!" << endl;
 				cerr << "Reason: " << e.what() << endl;
-			}
+			}*/
 
 			// check for a collision between a player's hands and the ball
 			if (intersect(i) && ball->lastPlayer != players[i].playerNum)
-			{	char a;
+			{	
+				cout << "Hit the ball for player " << players[i].playerNum << endl;
 				vec3 s = ball->calcCenterPoint();
 				sheild = SoundEngine->play3D("Assets/sound/clang.wav",
 					vec3df(s.x, s.y, s.z), false, false, true);
@@ -681,7 +714,7 @@ protected:
 				try
 				{
 					ball->lastPlayer = players[i].playerNum;
-					client->async_call("setLastPlayer", players[i].playerNum);
+					//client->async_call("setLastPlayer", players[i].playerNum);
 				}
 				catch (rpc::rpc_error& e)
 				{
@@ -692,7 +725,6 @@ protected:
 				glm::quat direc = ovr::toGlm(players[i].hand->HandPose.Orientation);
 				vec3 reflect = glm::mat4_cast(direc)* vec4(0.0, 0.0, 1.0f, 1.0f);
 				cout << reflect.x << reflect.y << reflect.z << endl;
-				//cin >> a;
 				ball->velocity = reflect*-0.15f;
 				if(i = 1)
 					ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 1.0f);

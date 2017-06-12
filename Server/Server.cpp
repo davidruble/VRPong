@@ -11,7 +11,10 @@ static s_Pose oculus_handPose;
 static s_Pose leap_headPose;
 static s_Pose leap_handPose;
 
-static int lastPlayer;
+static int lastPlayer = 0;
+
+static bool oculusIsReady = false;
+static bool leapIsReady = false;
 
 // setter for head and hand pose
 void setPose(int player, int whichPose, s_Pose pose)
@@ -83,6 +86,29 @@ s_Pose getPose(int player, int whichPose)
 	}
 }
 
+void oculusReady()
+{
+	oculusIsReady = true;
+	cout << "Oculus is ready" << endl;
+}
+
+void leapReady()
+{
+	leapIsReady = true;
+	cout << "Leap is ready" << endl;
+}
+
+bool checkConnection()
+{
+	if (!oculusIsReady || !leapIsReady)
+		return false;
+	else
+	{
+		cout << "Both palyers connected" << endl;
+		return true;
+	}
+}
+
 // setter for setting the last player to hit the ball
 void setLastPlayer(int playerNum)
 {
@@ -106,6 +132,9 @@ int main(int argc, char* argv[])
 	srv.bind("getPose", &getPose);
 	srv.bind("setLastPlayer", &setLastPlayer);
 	srv.bind("getLastPlayer", &getLastPlayer);
+	srv.bind("oculusReady", &oculusReady);
+	srv.bind("leapReady", &leapReady);
+	srv.bind("checkConnection", &checkConnection);
 
 	cout << "Waiting for RPC calls..." << endl;
 	srv.run();
