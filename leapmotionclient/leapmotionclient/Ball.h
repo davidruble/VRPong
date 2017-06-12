@@ -8,7 +8,7 @@ class Ball : protected Model
 public:
 	Ball();
 	void Draw(Shader shader);
-	void update();
+	void update(float deltaTime);
 	glm::vec3 calcCenterPoint();
 	~Ball();
 	glm::vec3 velocity;

@@ -27,8 +27,8 @@ void initGame();
 void initSound();
 void update();
 // settings
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
 
 // camera
 Camera camera1(glm::vec3(-0.015f, 0.1f, -3.0f));
@@ -101,7 +101,6 @@ int main()
 
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -127,6 +126,10 @@ int main()
     // -----------
     while (!glfwWindowShouldClose(window))
     {
+		currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+		
 		try
 		{
 			// let the server know leap is ready
@@ -152,9 +155,6 @@ int main()
 
         // per-frame time logic
         // --------------------
-        currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
 
         // input
         // -----
@@ -278,9 +278,8 @@ void update()
 {
 	bool triggerr = false;
 	int frame = (int)currentFrame;
-
-	ball->update();
-	if (ball->outOfBounds)
+	ball->update(deltaTime);
+	/*if (ball->outOfBounds)
 	{
 		try
 		{
@@ -292,7 +291,7 @@ void update()
 			cerr << "Unable to set last player!" << endl;
 			cerr << "Reason: " << e.what() << endl;
 		}
-	}
+	}*/
 
 	// TODO: set the update rates lower and interpolate to new remote positions
 	for (int i = 0; i < players.size(); ++i) 
@@ -304,7 +303,7 @@ void update()
 			players[i].update(NULL, NULL);
 
 			// send an updated position to the server every certain number of frames
-			if (frame % 2 == 0)
+			if (frame % 1 == 0)
 			{
 				//cout << "Updating remote pose" << endl;
 				try
@@ -322,7 +321,7 @@ void update()
 		else 
 		{
 			// get an updated position from the server every certain number of frames
-			if (frame % 2 == 0)
+			if (frame % 1 == 0)
 			{
 				//cout << "Getting remote pose" << endl;
 				try
@@ -345,8 +344,8 @@ void update()
 			players[i].update(NULL, NULL);
 		}
 
-		// get the updated ball position
-		try
+		// get the last player to hit
+		/*try
 		{
 			ball->lastPlayer = client->call("getLastPlayer").as<int>();
 		}
@@ -354,11 +353,12 @@ void update()
 		{
 			cerr << "Unable to get last player!" << endl;
 			cerr << "Reason: " << e.what() << endl;
-		}
+		}*/
 
 		// check for a collision between a player's hands and the ball
 		if (intersect(i) && ball->lastPlayer != players[i].playerNum)
 		{
+			cout << "Hit the ball for player " << players[i].playerNum << endl;
 			vec3 s = ball->calcCenterPoint();
 			sheild = SoundEngine->play3D("Assets/sound/clang.wav",
 				vec3df(s.x, s.y, s.z), false, false, true);
@@ -369,7 +369,7 @@ void update()
 			try
 			{
 				ball->lastPlayer = players[i].playerNum;
-				client->async_call("setLastPlayer", players[i].playerNum);
+				//client->async_call("setLastPlayer", players[i].playerNum);
 			}
 			catch (rpc::rpc_error& e)
 			{
@@ -380,7 +380,6 @@ void update()
 			glm::quat direc = ovr::toGlm(players[i].hand->HandPose.Orientation);
 			vec3 reflect = glm::mat4_cast(direc)* vec4(0.0, 0.0, 1.0f, 1.0f);
 			cout << reflect.x << reflect.y << reflect.z << endl;
-			//cin >> a;
 			ball->velocity = reflect*-0.15f;
 		}
 	}
@@ -399,7 +398,7 @@ void initGame()
 	// start the client and initialize the poses for this player on the server
 	try
 	{
-		client = new rpc::client(SERVER_IP, 8080);
+		client = new rpc::client(SERVER_IP, SERVER_PORT);
 		client->call("setPose", LEAP, HEAD, serializePose(players[1].head->HeadPose));
 		client->call("setPose", LEAP, HAND, serializePose(players[1].hand->HandPose));
 	}
