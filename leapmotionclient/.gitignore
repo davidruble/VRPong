@@ -33,6 +33,7 @@ leapmotionclient/bld/
 leapmotionclient/[Bb]in/
 leapmotionclient/[Oo]bj/
 leapmotionclient/[Ll]og/
+!include/**
 
 
 # Visual Studio 2015 cache/options directory
