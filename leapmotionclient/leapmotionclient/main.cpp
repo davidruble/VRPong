@@ -27,8 +27,8 @@ void initGame();
 void initSound();
 void update();
 // settings
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_HEIGHT = 720;
 
 // camera
 Camera camera1(glm::vec3(-0.015f, 0.1f, -3.0f));
@@ -70,6 +70,8 @@ GLint shaderProgram;
 rpc::client* client; 
 ovrPosef remoteHeadPose;
 ovrPosef remoteHandPose;
+bool initialized = false;
+bool ready = false;
 
 float currentFrame;
 
@@ -120,10 +122,34 @@ int main()
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
+		try
+		{
+			// let the server know leap is ready
+			if (!initialized)
+			{
+				cout << "Initializing leap..." << endl;
+				client->call("leapReady");
+				initialized = true;
+			}
+
+			// Check if all players are connected
+			if (!ready)
+			{
+				while(!(ready = client->call("checkConnection").as<bool>()));
+				cout << "Starting program!" << endl;
+			}
+		}
+		catch (rpc::rpc_error& e)
+		{
+			cerr << "Unable to ready leap!" << endl;
+			cerr << "Reason: " << e.what() << endl;
+		}
+
         // per-frame time logic
         // --------------------
         currentFrame = glfwGetTime();
@@ -371,9 +397,9 @@ void initGame()
 	//controller.setPolicy(Leap::Controller::POLICY_ALLOW_PAUSE_RESUME);
 
 	// start the client and initialize the poses for this player on the server
-	client = new rpc::client(SERVER_IP, 8080);
 	try
 	{
+		client = new rpc::client(SERVER_IP, 8080);
 		client->call("setPose", LEAP, HEAD, serializePose(players[1].head->HeadPose));
 		client->call("setPose", LEAP, HAND, serializePose(players[1].hand->HandPose));
 	}
