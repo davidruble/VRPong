@@ -9,6 +9,8 @@
 #define LEAP 1
 #define HEAD 0
 #define HAND 1
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 8080
 
 // serializable pose object
 struct s_Pose

@@ -126,7 +126,8 @@ void glDebugCallbackHandler(GLenum source, GLenum type, GLuint id, GLenum severi
 
 #include <GLFW/glfw3.h>
 
-namespace glfw {
+namespace glfw 
+{
 	inline GLFWwindow * createWindow(const uvec2 & size, const ivec2 & position = ivec2(INT_MIN)) {
 		GLFWwindow * window = glfwCreateWindow(size.x, size.y, "glfw", nullptr, nullptr);
 		if (!window) {
@@ -140,8 +141,8 @@ namespace glfw {
 }
 
 // A class to encapsulate using GLFW to handle input and render a scene
-class GlfwApp {
-
+class GlfwApp 
+{
 protected:
 	uvec2 windowSize;
 	ivec2 windowPosition;
@@ -286,7 +287,8 @@ private:
 
 
 
-class RiftManagerApp {
+class RiftManagerApp 
+{
 protected:
 	ovrSession _session;
 	ovrHmdDesc _hmdDesc;
@@ -307,7 +309,8 @@ public:
 	}
 };
 
-class RiftApp : public GlfwApp, public RiftManagerApp {
+class RiftApp : public GlfwApp, public RiftManagerApp 
+{
 public:
 	ovrPosef headPose;
 private:
@@ -467,179 +470,17 @@ protected:
 	virtual void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose, ovrPosef & eyePose) = 0;
 };
 
-//////////////////////////////////////////////////////////////////////
-//
-// The remainder of this code is specific to the scene we want to 
-// render.  I use oglplus to render an array of cubes, but your 
-// application would perform whatever rendering you want
-//
-
-
-//////////////////////////////////////////////////////////////////////
-//
-// OGLplus is a set of wrapper classes for giving OpenGL a more object
-// oriented interface
-//
-#define OGLPLUS_USE_GLCOREARB_H 0
-#define OGLPLUS_USE_GLEW 1
-#define OGLPLUS_USE_BOOST_CONFIG 0
-#define OGLPLUS_NO_SITE_CONFIG 1
-#define OGLPLUS_LOW_PROFILE 1
-
-#pragma warning( disable : 4068 4244 4267 4065)
-#include <oglplus/config/basic.hpp>
-#include <oglplus/config/gl.hpp>
-#include <oglplus/all.hpp>
-#include <oglplus/interop/glm.hpp>
-#include <oglplus/bound/texture.hpp>
-#include <oglplus/bound/framebuffer.hpp>
-#include <oglplus/bound/renderbuffer.hpp>
-#include <oglplus/bound/buffer.hpp>
-#include <oglplus/shapes/cube.hpp>
-#include <oglplus/shapes/wrapper.hpp>
-#pragma warning( default : 4068 4244 4267 4065)
-
-
-
-namespace Attribute {
-	enum {
-		Position = 0,
-		TexCoord0 = 1,
-		Normal = 2,
-		Color = 3,
-		TexCoord1 = 4,
-		InstanceTransform = 5,
-	};
-}
-
-static const char * VERTEX_SHADER = R"SHADER(
-#version 410 core
-
-uniform mat4 ProjectionMatrix = mat4(1);
-uniform mat4 CameraMatrix = mat4(1);
-
-layout(location = 0) in vec4 Position;
-layout(location = 2) in vec3 Normal;
-layout(location = 5) in mat4 InstanceTransform;
-
-out vec3 vertNormal;
-
-void main(void) {
-   mat4 ViewXfm = CameraMatrix; // InstanceTransform;
-   //mat4 ViewXfm = CameraMatrix;
-   vertNormal = Normal;
-   gl_Position = ProjectionMatrix * ViewXfm * Position;
-}
-)SHADER";
-
-static const char * FRAGMENT_SHADER = R"SHADER(
-#version 410 core
-
-in vec3 vertNormal;
-out vec4 fragColor;
-
-void main(void) {
-    vec3 color = vertNormal;
-    if (!all(equal(color, abs(color)))) {
-        color = vec3(1.0) - abs(color);
-    }
-    fragColor = vec4(color, 1.0);
-}
-)SHADER";
-
-// a class for encapsulating building and rendering an RGB cube
-struct ColorCubeScene {
-
-	// Program
-	oglplus::shapes::ShapeWrapper cube;
-	oglplus::Program prog;
-	oglplus::VertexArray vao;
-	GLuint instanceCount;
-	oglplus::Buffer instances;
-
-	// VBOs for the cube's vertices and normals
-
-	const unsigned int GRID_SIZE{ 5 };
-
-public:
-	ColorCubeScene() : cube({ "Position", "Normal" }, oglplus::shapes::Cube()) {
-		using namespace oglplus;
-		try {
-			// attach the shaders to the program
-			prog.AttachShader(
-				FragmentShader()
-				.Source(GLSLSource(String(FRAGMENT_SHADER)))
-				.Compile()
-			);
-			prog.AttachShader(
-				VertexShader()
-				.Source(GLSLSource(String(VERTEX_SHADER)))
-				.Compile()
-			);
-			prog.Link();
-		}
-		catch (ProgramBuildError & err) {
-			FAIL((const char*)err.what());
-		}
-
-		// link and use it
-		prog.Use();
-
-		vao = cube.VAOForProgram(prog);
-		vao.Bind();
-		// Create a cube of cubes
-		{
-			std::vector<mat4> instance_positions;
-			for (unsigned int z = 0; z < GRID_SIZE; ++z) {
-				for (unsigned int y = 0; y < GRID_SIZE; ++y) {
-					for (unsigned int x = 0; x < GRID_SIZE; ++x) {
-						int xpos = (x - (GRID_SIZE / 2)) * 2;
-						int ypos = (y - (GRID_SIZE / 2)) * 2;
-						int zpos = (z - (GRID_SIZE / 2)) * 2;
-						vec3 relativePosition = vec3(xpos, ypos, zpos);
-						if (relativePosition == vec3(0)) {
-							continue;
-						}
-						instance_positions.push_back(glm::translate(glm::mat4(1.0f), relativePosition));
-					}
-				}
-			}
-
-			Context::Bound(Buffer::Target::Array, instances).Data(instance_positions);
-			instanceCount = (GLuint)instance_positions.size();
-			int stride = sizeof(mat4);
-			for (int i = 0; i < 4; ++i) {
-				VertexArrayAttrib instance_attr(prog, Attribute::InstanceTransform + i);
-				size_t offset = sizeof(vec4) * i;
-				instance_attr.Pointer(4, DataType::Float, false, stride, (void*)offset);
-				instance_attr.Divisor(1);
-				instance_attr.Enable();
-			}
-		}
-	}
-
-	void render(const mat4 & projection, const mat4 & modelview) {
-		using namespace oglplus;
-		prog.Use();
-		Uniform<mat4>(prog, "ProjectionMatrix").Set(projection);
-		Uniform<mat4>(prog, "CameraMatrix").Set(modelview);
-
-		//vao.Bind();
-		//cube.Draw(instanceCount);
-	}
-};
-
 #include "model.h"
 #include "shader.h"
 #include "Hand.h"
-#include "Laser.h"
-#include "Factory.h"
 #include "Level.h"
 #include "Ball.h"
 #include "Player.h"
-#include <irrKlang\irrKlang.h>
 #include <stdio.h>
 #include <conio.h>
+
+#include <irrKlang\irrKlang.h>
+using namespace irrklang;
 
 // server includes
 #include "rpc/client.h"
@@ -649,16 +490,14 @@ public:
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
 
-#define LVERTEX_SHADER_PATH "laser.vert"
-#define LFRAGMENT_SHADER_PATH "laser.frag"
-using namespace irrklang;
 glm::vec3 lightPos(0.0f, 0.2f, 0.0f);
 glm::vec3 lightAmbient(0.5f, 0.5f, 0.5f);
 glm::vec3 lightDiffuse(0.700000f, 0.500000f, 1.00000f);
 glm::vec3 lightSpecular(1.0f, 1.0f, 1.0f);
 
-// An example application that renders a simple cube
-class ExampleApp : public RiftApp {
+// Defines the main application to run
+class ExampleApp : public RiftApp 
+{
 	vector<Player> players;
 	Level * level;
 	Ball * ball;
@@ -688,9 +527,7 @@ protected:
 		int deviceNumber = _getch() - '0';
 
 		// create device with the selected driver
-
 		const char* deviceID = deviceList->getDeviceID(deviceNumber);
-
 		SoundEngine = createIrrKlangDevice(irrklang::ESOD_AUTO_DETECT,
 			irrklang::ESEO_DEFAULT_OPTIONS,
 			deviceID);
@@ -701,7 +538,6 @@ protected:
 		music->setVolume(0.5);
 		SoundEngine->setListenerPosition(vec3df(0, 0, 3.0),
 			vec3df(0, 0, 1));
-
 	}
 	
 	void initGl() override {
@@ -709,10 +545,7 @@ protected:
 		glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
 		glEnable(GL_DEPTH_TEST);
 		ovr_RecenterTrackingOrigin(_session);
-		// Load the shader program. Make sure you have the correct filepath up top
-		//shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 		shader = new Shader(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-		//SETUP INITIAL SCENE HERE
 		level = new Level();
 		ball = new Ball();
 		players.push_back(Player(players.size() + 1, new Hand(_session, frame, false)));
@@ -720,7 +553,7 @@ protected:
 		initSound();
 
 		// start the client and initialize the poses for this player on the server
-		client = new rpc::client("127.0.0.1", 8080);
+		client = new rpc::client(SERVER_IP, SERVER_PORT);
 		try
 		{
 			client->call("setPose", OCULUS, HEAD, serializePose(players[0].head->HeadPose));
@@ -867,8 +700,8 @@ protected:
 		}
 	}
 
-	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose, ovrPosef & eyePose) override {
-		
+	void renderScene(const glm::mat4 & projection, const glm::mat4 & headPose, ovrPosef & eyePose) override 
+	{
 		shader->Use();
 		
 		glUniform3fv(glGetUniformLocation(shader->Program, "light.position"), 1, &lightPos[0]);

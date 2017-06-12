@@ -1,7 +1,6 @@
 #include "Head.h"
 #include "OVRUTIL.h"
 
-
 Head::Head() : Model(HEAD_PATH)
 {
 	for (GLuint i = 0; i < this->meshes.size(); i++) {
@@ -10,8 +9,8 @@ Head::Head() : Model(HEAD_PATH)
 	toWorld = glm::translate(glm::scale(ovr::toGlm(HeadPose), glm::vec3(0.2f, 0.2f, 0.2f)), glm::vec3(0.0f, -1.0f, -3.0f));
 }
 
-
-bool Head::update(bool isLeap) {
+bool Head::update(bool isLeap) 
+{
 	//cout << "starting update" << endl;
 	//transform hands
 	if (!isLeap) {
@@ -35,9 +34,7 @@ bool Head::update(bool isLeap) {
 
 void Head::Draw(Shader shader)
 {
-
 	Model::Draw(shader);
-
 }
 
 Head::~Head()
