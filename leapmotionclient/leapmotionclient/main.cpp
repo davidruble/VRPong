@@ -278,7 +278,7 @@ void update()
 {
 	bool triggerr = false;
 	int frame = (int)currentFrame;
-	ball->update(deltaTime);
+	//ball->update(deltaTime);
 	/*if (ball->outOfBounds)
 	{
 		try
@@ -292,6 +292,21 @@ void update()
 			cerr << "Reason: " << e.what() << endl;
 		}
 	}*/
+
+	// get the position of the ball from the server
+	if (frame % 1 == 0)
+	{
+		try
+		{
+			ball->meshes[0].toWorld = deserializeMat(client->call("getBallPose", 0).as<s_Mat>());
+			ball->meshes[1].toWorld = deserializeMat(client->call("getBallPose", 1).as<s_Mat>());
+		}
+		catch (rpc::rpc_error& e)
+		{
+			cerr << "Unable to get ball position from server!" << endl;
+			cerr << "Reason: " << e.what() << endl;
+		}
+	}
 
 	// TODO: set the update rates lower and interpolate to new remote positions
 	for (int i = 0; i < players.size(); ++i) 
@@ -356,32 +371,32 @@ void update()
 		}*/
 
 		// check for a collision between a player's hands and the ball
-		if (intersect(i) && ball->lastPlayer != players[i].playerNum)
-		{
-			cout << "Hit the ball for player " << players[i].playerNum << endl;
-			vec3 s = ball->calcCenterPoint();
-			sheild = SoundEngine->play3D("Assets/sound/clang.wav",
-				vec3df(s.x, s.y, s.z), false, false, true);
-			sheild->setMinDistance(1.0f);
-			ball->velocity = -ball->velocity;
-			
-			// update the last player to touch the ball
-			try
-			{
-				ball->lastPlayer = players[i].playerNum;
-				//client->async_call("setLastPlayer", players[i].playerNum);
-			}
-			catch (rpc::rpc_error& e)
-			{
-				cerr << "Unable to set last player!" << endl;
-				cerr << "Reason: " << e.what() << endl;
-			}
+		//if (intersect(i) && ball->lastPlayer != players[i].playerNum)
+		//{
+		//	cout << "Hit the ball for player " << players[i].playerNum << endl;
+		//	vec3 s = ball->calcCenterPoint();
+		//	sheild = SoundEngine->play3D("Assets/sound/clang.wav",
+		//		vec3df(s.x, s.y, s.z), false, false, true);
+		//	sheild->setMinDistance(1.0f);
+		//	ball->velocity = -ball->velocity;
+		//	
+		//	// update the last player to touch the ball
+		//	try
+		//	{
+		//		ball->lastPlayer = players[i].playerNum;
+		//		//client->async_call("setLastPlayer", players[i].playerNum);
+		//	}
+		//	catch (rpc::rpc_error& e)
+		//	{
+		//		cerr << "Unable to set last player!" << endl;
+		//		cerr << "Reason: " << e.what() << endl;
+		//	}
 
-			glm::quat direc = ovr::toGlm(players[i].hand->HandPose.Orientation);
-			vec3 reflect = glm::mat4_cast(direc)* vec4(0.0, 0.0, 1.0f, 1.0f);
-			cout << reflect.x << reflect.y << reflect.z << endl;
-			ball->velocity = reflect*-0.15f;
-		}
+		//	glm::quat direc = ovr::toGlm(players[i].hand->HandPose.Orientation);
+		//	vec3 reflect = glm::mat4_cast(direc)* vec4(0.0, 0.0, 1.0f, 1.0f);
+		//	cout << reflect.x << reflect.y << reflect.z << endl;
+		//	ball->velocity = reflect*-0.15f;
+		//}
 	}
 }
 

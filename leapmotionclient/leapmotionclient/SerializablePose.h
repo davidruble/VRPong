@@ -3,6 +3,9 @@
 
 #include <LibOVR/OVR_CAPI.h>
 #include <rpc/server.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
 // shared defines for RPC parameters
 #define OCULUS 0
@@ -20,6 +23,13 @@ struct s_Pose
 
 	MSGPACK_DEFINE_MAP(pos_x, pos_y, pos_z,
 		rot_x, rot_y, rot_z, rot_w);
+};
+
+// serializable matrix
+struct s_Mat
+{
+	std::vector<float> values;
+	MSGPACK_DEFINE_MAP(values);
 };
 
 // serializes an ovr pose for the server
@@ -57,6 +67,29 @@ ovrPosef deserializePose(s_Pose poseIn)
 	retPose.Position = pos;
 	retPose.Orientation = rot;
 	return retPose;
+}
+
+// serialize a glm matrix for the server
+s_Mat serializeMat(glm::mat4 mat)
+{
+	float convertedMat[16] = { 0.0f };
+
+	const float *pSource = (const float*)glm::value_ptr(mat);
+	for (int i = 0; i < 16; ++i)
+		convertedMat[i] = pSource[i];
+
+	std::vector<float> m(convertedMat, convertedMat + sizeof(convertedMat) / sizeof(convertedMat[0]));
+
+	s_Mat ret;
+	ret.values = m;
+	return ret;
+}
+
+// deserialize a server matrix for glm
+glm::mat4 deserializeMat(s_Mat mat)
+{
+	glm::mat4 ret = glm::make_mat4(mat.values.data());
+	return ret;
 }
 
 #endif
