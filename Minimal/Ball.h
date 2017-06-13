@@ -3,7 +3,7 @@
 #include "Shader.h"
 #define BALL_PATH "Assets/dekunut/Deku_Nut.obj"
 
-class Ball : protected Model
+class Ball : public Model
 {
 public:
 	Ball();

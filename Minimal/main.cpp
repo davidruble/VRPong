@@ -623,6 +623,22 @@ protected:
 			ovr_SetControllerVibration(_session, ovrControllerType_RTouch, 0.0f, 0.0f);
 
 		ball->update(deltaTime);
+
+		// send an updated position for the ball
+		if (frame % 1 == 0)
+		{
+			try
+			{
+				client->async_call("setBallPose", serializeMat(ball->meshes[0].toWorld), 0);
+				client->async_call("setBallPose", serializeMat(ball->meshes[1].toWorld), 1);
+			}
+			catch (rpc::rpc_error& e)
+			{
+				cerr << "Unable to set ball position!" << endl;
+				cerr << "Reason: " << e.what() << endl;
+			}
+		}
+
 		/*if (ball->outOfBounds)
 		{
 			try

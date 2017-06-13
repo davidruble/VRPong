@@ -9,6 +9,7 @@ Ball::Ball() : Model(BALL_PATH)
 	released = true;
 	lastPlayer = 0;
 	outOfBounds = false;
+	cerr << "Ball mesh size: " << meshes.size() << endl;
 }
 
 void Ball::update(float deltaTime) 

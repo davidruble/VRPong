@@ -11,6 +11,8 @@ static s_Pose oculus_handPose;
 static s_Pose leap_headPose;
 static s_Pose leap_handPose;
 
+static s_Mat ballPose[2];
+
 static int lastPlayer = 0;
 
 static bool oculusIsReady = false;
@@ -86,6 +88,18 @@ s_Pose getPose(int player, int whichPose)
 	}
 }
 
+void setBallPose(s_Mat mat, int index)
+{
+	//cout << "Setting ball pose..." << endl;
+	ballPose[index] = mat;
+}
+
+s_Mat getBallPose(int index)
+{
+	//cout << "Getting ball pose..." << endl;
+	return ballPose[index];
+}
+
 void oculusReady()
 {
 	oculusIsReady = true;
@@ -132,6 +146,8 @@ int main(int argc, char* argv[])
 	srv.bind("getPose", &getPose);
 	srv.bind("setLastPlayer", &setLastPlayer);
 	srv.bind("getLastPlayer", &getLastPlayer);
+	srv.bind("setBallPose", &setBallPose);
+	srv.bind("getBallPose", &getBallPose);
 	srv.bind("oculusReady", &oculusReady);
 	srv.bind("leapReady", &leapReady);
 	srv.bind("checkConnection", &checkConnection);
