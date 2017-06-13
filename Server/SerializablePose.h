@@ -2,7 +2,7 @@
 #define SERIALIZABLE_POSE_H
 
 #include <LibOVR/OVR_CAPI.h>
-#include <rpc.h>
+#include <rpc/server.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>

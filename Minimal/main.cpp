@@ -490,6 +490,8 @@ using namespace irrklang;
 #define VERTEX_SHADER_PATH "shader.vert"
 #define FRAGMENT_SHADER_PATH "shader.frag"
 
+#define SYNC_INTERVAL 1
+
 glm::vec3 lightPos(0.0f, 0.2f, 0.0f);
 glm::vec3 lightAmbient(0.5f, 0.5f, 0.5f);
 glm::vec3 lightDiffuse(0.700000f, 0.500000f, 1.00000f);
@@ -625,7 +627,7 @@ protected:
 		ball->update(deltaTime);
 
 		// send an updated position for the ball
-		if (frame % 1 == 0)
+		if (frame % SYNC_INTERVAL == 0)
 		{
 			try
 			{
@@ -658,7 +660,7 @@ protected:
 			if (players[i].hand->isLeap) 
 			{
 				// get an updated position from the server every certain number of frames
-				if (frame % 1 == 0)
+				if (frame % SYNC_INTERVAL == 0)
 				{
 					//cout << "Getting remote pose" << endl;
 					try
@@ -689,7 +691,7 @@ protected:
 				players[i].update(NULL, NULL);
 
 				// send an updated position to the server every certain number of frames
-				if (frame % 1 == 0)
+				if (frame % SYNC_INTERVAL == 0)
 				{
 					//cout << "Updating remote pose" << endl;
 					try
